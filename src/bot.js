@@ -1,7 +1,8 @@
-let rootDIr = "./..";
+var rootDir = "./..";
+var node_modules_dir = rootDir + "/node_modules"
 
-var Discord = require('discord.io');
-var logger = require('winston');
+var Discord = require(node_modules_dir + '/discord.io');
+var logger = require(node_modules_dir + '/winston');
 var auth = require(rootDir + '/json/auth.json');
 // Configure logger settings
 logger.remove(logger.transports.Console);
