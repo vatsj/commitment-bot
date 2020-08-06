@@ -1,2 +1,2 @@
-# don't record my bot token
-json/secure
+# don't record anything in secure directory
+# json/secure
