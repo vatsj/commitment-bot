@@ -24,4 +24,5 @@ var discordBot = new Discord.Client({
    autorun: true
 });
 
+// uses Bot class, to eventually be moved to Commitment-bot
 var bot = new Bot(discordBot, logger);
