@@ -34,8 +34,11 @@ module.exports = class Bot {
       this.say(':B:ong!');
     }
 
+    commands['identity'] = () => {
+      this.say('I am the following class of bot:\t'+ this.identity());
+    }
+
     commands['error'] = () => {
-      this.log('hello I try to speak but fail');
       this.say('Command not found');
     }
 
@@ -43,7 +46,13 @@ module.exports = class Bot {
 
   }
 
-  // TODO: choose fn based on command keyword
+  // returns identity of Bot
+  // used to test subclass method overwriting
+  identity() {
+    return "Bot (the default class of bot)";
+  }
+
+  // test method for respond functionality
   testRespond(user, userID, channelID, message, evt) {
     // default response, for testing
     if (message.substring(0, 1) == '!') {
