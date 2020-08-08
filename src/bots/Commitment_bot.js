@@ -1,6 +1,12 @@
 // imports Bot.js class as a superclass
 var Bot = require("./Bot.js");
 
+// imports class-specific resources
+var rootDir = "./../..";
+var bot_resources = rootDir + "/src/resources/Commitment_bot";
+
+var Commitment = require(bot_resources + "/Commitment.js");
+
 module.exports = class Commitment_bot extends Bot {
 
   // TODO: add test commitment handler
@@ -27,6 +33,15 @@ module.exports = class Commitment_bot extends Bot {
     // TODO: add more commands (specific to C_bot)
 
     return commands;
+  }
+
+  commitment_test() {
+
+    let cmt = new Commitment(); //fix it
+
+    this.commands['CT'] = () => {
+
+    }
   }
 
 }

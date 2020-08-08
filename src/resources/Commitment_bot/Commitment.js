@@ -1,6 +1,6 @@
 class Commitment {
 
-  constructor(bot, user,, channelID, comJSON) {
+  constructor(bot, user, channelID, comJSON) {
     // TODO: fill in
 
     // info about bot, to return messages

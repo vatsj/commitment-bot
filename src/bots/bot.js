@@ -30,16 +30,24 @@ module.exports = class Bot {
     let commands = { }
 
     // test command: 'ping' --> say('pong')
-    commands['ping'] = () => {
+    commands['ping'] = (args, messageInfo) => {
       this.say(':B:ong!');
     }
 
-    commands['identity'] = () => {
+    commands['info'] = (args, messageInfo) => {
+
+      let info = JSON.stringify(messageInfo);
+
+      this.log(info);
+      this.say(info);
+    }
+
+    commands['identity'] = (args, messageInfo) => {
       this.say('I am the following class of bot:\t'+ this.identity());
     }
 
-    commands['error'] = () => {
-      this.say('Command not found');
+    commands['error'] = (args, messageInfo) => {
+      this.say('error: command not found');
     }
 
     return commands;
@@ -62,6 +70,13 @@ module.exports = class Bot {
 
   respond(user, userID, channelID, message, evt) {
     if (message.substring(0, 1) == '!') {
+        var messageInfo = {
+          'user': user,
+          'userID': userID,
+          'channelID': channelID,
+          'message': message,
+          'evt': evt
+        };
         var args = message.substring(1).split(' ');
 
         var cmd = args[0];
@@ -70,8 +85,12 @@ module.exports = class Bot {
         if (! (cmd in this.commands)) {
           cmd = 'error'
         }
+
+        // hacky default for this.say
+        // might mistakenlysend messages to wrong channel
         this.channelID = channelID;
-        this.commands[cmd]();
+
+        this.commands[cmd](args, messageInfo);
      }
   }
 
