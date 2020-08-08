@@ -23,6 +23,7 @@ class Commitment {
     if (! this.fulfilled) {
       onFailure();
     }
+    // resets commitment fulfillment status
     this.fulfulled = false;
   }
 

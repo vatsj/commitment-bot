@@ -1,7 +1,7 @@
 # commitment-bot
 a discord bot for commitments; lets you record time commitments and holds you to them later
 
-To active bot, execute the following command in terminal while in the main project folder:
+To activate bot, execute the following command in terminal while in the main project folder:
 > node src/main.js
 
 # dependencies
