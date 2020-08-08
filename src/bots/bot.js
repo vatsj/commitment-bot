@@ -27,7 +27,7 @@ module.exports = class Bot {
 
   initCommands() {
     // creates a json object to store commands
-    let commands = { }
+    let commands = { };
 
     // test command: 'ping' --> say('pong')
     commands['ping'] = (args, messageInfo) => {

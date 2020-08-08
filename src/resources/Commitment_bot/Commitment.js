@@ -1,6 +1,6 @@
-class Commitment {
+module.exports = class Commitment {
 
-  constructor(bot, user, channelID, comJSON) {
+  constructor(bot, user, channelID, JSON) {
     // TODO: fill in
 
     // info about bot, to return messages
@@ -9,13 +9,25 @@ class Commitment {
 
     // info about commitment
     this.user = user;
-    this.extractJSON(comJSON)
+    // this.extractJSON(JSON)
   }
 
   extractJSON(comJSON) {
 
     this.name = comJSON['name'];
     this.period = time2hours(comJSON['period']);
+  }
+
+  // test method
+  getInfo() {
+    let content = JSON.stringify({
+      'bot': this.bot,
+      'user': this.user,
+      'channelID': this.channelID,
+      'etc': ''
+    });
+
+    return content;
   }
 
   // checks whether the commitment was fulfilled
@@ -29,10 +41,10 @@ class Commitment {
 
   // determines reaction based on whether commitment is fulfilled
   onSuccess() {
-    bot.say(channelID, "good job m8");
+    this.bot.say("good job m8", this.channelID);
   }
   onFailure() {
-    boy.say(channelID, "B A d DO THE THING");
+    this.bot.say("B A d DO THE THING", this.channelID);
   }
 
 }

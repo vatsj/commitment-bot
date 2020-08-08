@@ -7,6 +7,9 @@ var bot_resources = rootDir + "/src/resources/Commitment_bot";
 
 var Commitment = require(bot_resources + "/Commitment.js");
 
+// imports resources specific to testing env
+var messageInfo_test = require(rootDir + "/json/secure/messageInfo_test.json");
+
 module.exports = class Commitment_bot extends Bot {
 
   // TODO: add test commitment handler
@@ -18,6 +21,12 @@ module.exports = class Commitment_bot extends Bot {
     super(discordBot, logger);
 
     // TODO: add stuff for commitments/scheduling?
+    // JSON storing commitments
+    // stored in form {person: {name: [Commitment]}}
+    this.commitments = {};
+
+    // TESTING: running test fn
+    this.commitment_test();
   }
 
   // returns identity of Bot
@@ -37,10 +46,13 @@ module.exports = class Commitment_bot extends Bot {
 
   commitment_test() {
 
-    let cmt = new Commitment(); //fix it
+    let cmt = new Commitment(this, messageInfo_test['user'], messageInfo_test['channelID'], {}); //fix it
 
     this.commands['CT'] = () => {
 
+      this.log(""+cmt.getInfo());
+
+      cmt.onSuccess();
     }
   }
 
