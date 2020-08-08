@@ -39,12 +39,18 @@ module.exports = class Commitment {
     this.fulfulled = false;
   }
 
+  // say(content) method, similar to Bot.js say()
+  // piggybacks off of Bot.say() using default channelID
+  say(content) {
+    this.bot.say(content, this.channelID);
+  }
+
   // determines reaction based on whether commitment is fulfilled
   onSuccess() {
-    this.bot.say("good job m8", this.channelID);
+    this.say("good job m8");
   }
   onFailure() {
-    this.bot.say("B A d DO THE THING", this.channelID);
+    this.say("B A d DO THE THING");
   }
 
 }
