@@ -56,18 +56,21 @@ module.exports = class Commitment_bot extends Bot {
   commitment_test() {
 
     // 'etc''s added in for ease of commenting out lines
-    let cmtInfo_test = {
+    let scheduleInfo_test = {
       'name': "test commitment!",
       'cron': "* * * * * *",
       'etc': ""
     }
-    let cmt = new Commitment(this, this.schedule, messageInfo_test, {});
+    let cmt = new Commitment(this, this.schedule, scheduleInfo_test, messageInfo_test);
 
     this.commands['CT'] = () => {
 
       // this.log(""+cmt.getInfo());
 
       cmt.onSuccess();
+
+      this.log(cmt.cron);
+      this.log(cmt.job);
     }
   }
 

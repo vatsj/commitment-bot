@@ -1,55 +1,55 @@
-module.exports = class Commitment {
+// imports ScheduledEvent.js class as a superclass
+var ScheduledEvent = require("./ScheduledEvent.js");
 
-  constructor(bot, schedule, message_info, cmt_info) {
-    // TODO: fill in
+module.exports = class Commitment extends ScheduledEvent{
 
-    // binds
-    this.checkFulfillment = this.checkFulfillment.bind(this);
+  constructor(bot, schedule, schedule_info, cmt_info) {
+    // defines a ScheduledEvemt to evaluate the cmt
+    super(schedule, schedule_info);
 
     // info about bot, to return messages
     this.bot = bot;
-    this.schedule = schedule;
 
-    this.extract_message_info(message_info);
+    // this.extract_message_info(message_info);
     this.extract_cmt_info(cmt_info);
 
-    // sets the schedule event to evaluate the cmt
-    this.schedule_cmt();
-  }
 
-  extract_message_info(message_info) {
-
-    // keep this general storage trick, for now
-    this.message_info = message_info;
-
-    // encodes info about who/where the commitment is for
-    this.channelID = message_info['channelID'];
-    this.user = message_info['user'];
   }
 
   extract_cmt_info(cmt_info) {
 
     this.cmt_info = cmt_info
 
-    this.name = cmt_info['name'];
-    this.cron = cmt_info['cron'];
-
-    // this.period = time2hours(comJSON['period']);
+    // encodes info about who/where the commitment is for
+    this.channelID = cmt_info['channelID'];
+    this.user = cmt_info['user'];
   }
 
-  schedule_cmt() {
 
-    this.log("scheduling cmt!!!!! \n\n\n\n");
-    this.log(this.schedule);
-    this.job = this.schedule.scheduleJob(this.cron, this.checkFulfillment);
-    this.log(this.schedule);
-  }
+  // extract_cmt_info(cmt_info) {
+  //
+  //   this.cmt_info = cmt_info
+  //
+  //   this.name = cmt_info['name'];
+  //   this.cron = cmt_info['cron'];
+  //
+  //   // this.period = time2hours(comJSON['period']);
+  // }
+
+  // schedule_cmt() {
+  //
+  //   this.log("scheduling cmt!!!!! \n\n\n\n");
+  //   this.log(this.schedule);
+  //   this.job = this.schedule.scheduleJob(this.cron, this.checkFulfillment);
+  //   this.log(this.schedule);
+  // }
 
   // checks whether the commitment was fulfilled
-  checkFulfillment() {
+  // triggered by ScheduledEvent call
+  event() {
 
     // logs that the fn is called
-    this.log("scheduled event: checking cmt fulfillment\n");
+    this.log("\nscheduled event: checking cmt fulfillment\n");
 
     if (! this.fulfilled) {
       onFailure();
@@ -80,17 +80,15 @@ module.exports = class Commitment {
   // test method
   getInfo() {
 
-    let content = "";
+    let content = super.getInfo();
 
     content += JSON.stringify({
       'bot': this.bot,
-      'schedule': this.schedule,
       // 'user': this.user,
       // 'channelID': this.channelID,
       'etc': ''
     });
 
-    content += "\n\n" + JSON.stringify(this.message_info);
     content += "\n\n" + JSON.stringify(this.cmt_info);
 
     return content;
