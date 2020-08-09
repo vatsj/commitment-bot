@@ -65,12 +65,9 @@ module.exports = class Commitment_bot extends Bot {
 
     this.commands['CT'] = () => {
 
-      // this.log(""+cmt.getInfo());
+      this.log(cmt.getInfo());
 
       cmt.onSuccess();
-
-      this.log(cmt.cron);
-      this.log(cmt.job);
     }
   }
 

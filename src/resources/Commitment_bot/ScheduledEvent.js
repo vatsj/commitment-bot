@@ -10,6 +10,8 @@ module.exports = class ScheduledEvent {
 
     this.extract_schedule_info(schedule_info);
 
+    this.schedule_event();
+
   }
 
   extract_schedule_info(schedule_info) {
@@ -22,6 +24,10 @@ module.exports = class ScheduledEvent {
 
   schedule_event() {
     this.job = this.schedule.scheduleJob(this.cron, this.event);
+  }
+
+  unschedule_event() {
+    this.job.cancel();
   }
 
   event() {

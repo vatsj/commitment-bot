@@ -13,7 +13,6 @@ module.exports = class Commitment extends ScheduledEvent{
     // this.extract_message_info(message_info);
     this.extract_cmt_info(cmt_info);
 
-
   }
 
   extract_cmt_info(cmt_info) {
@@ -26,24 +25,6 @@ module.exports = class Commitment extends ScheduledEvent{
   }
 
 
-  // extract_cmt_info(cmt_info) {
-  //
-  //   this.cmt_info = cmt_info
-  //
-  //   this.name = cmt_info['name'];
-  //   this.cron = cmt_info['cron'];
-  //
-  //   // this.period = time2hours(comJSON['period']);
-  // }
-
-  // schedule_cmt() {
-  //
-  //   this.log("scheduling cmt!!!!! \n\n\n\n");
-  //   this.log(this.schedule);
-  //   this.job = this.schedule.scheduleJob(this.cron, this.checkFulfillment);
-  //   this.log(this.schedule);
-  // }
-
   // checks whether the commitment was fulfilled
   // triggered by ScheduledEvent call
   event() {
@@ -52,7 +33,7 @@ module.exports = class Commitment extends ScheduledEvent{
     this.log("\nscheduled event: checking cmt fulfillment\n");
 
     if (! this.fulfilled) {
-      onFailure();
+      this.onFailure();
     }
 
     this.reset_cmt();
