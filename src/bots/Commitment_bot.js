@@ -5,6 +5,7 @@ var Bot = require("./Bot.js");
 var rootDir = "./../..";
 var bot_resources = rootDir + "/src/resources/Commitment_bot";
 
+// importing resources
 var Commitment = require(bot_resources + "/Commitment.js");
 
 // imports resources specific to testing env
@@ -25,8 +26,10 @@ module.exports = class Commitment_bot extends Bot {
     // stored in form {person: {name: [Commitment]}}
     this.commitments = {};
 
-    // TESTING: running test fn
-    this.commitment_test();
+    // TESTING: running test fn after 1 second
+    setTimeout(() => {
+      this.commitment_test();
+    }, 1000);
   }
 
   // returns identity of Bot
@@ -44,13 +47,25 @@ module.exports = class Commitment_bot extends Bot {
     return commands;
   }
 
+  addSchedule(schedule) {
+
+    this.schedule = schedule;
+    this.log("schedule added!");
+  }
+
   commitment_test() {
 
-    let cmt = new Commitment(this, messageInfo_test['user'], messageInfo_test['channelID'], {}); //fix it
+    // 'etc''s added in for ease of commenting out lines
+    let cmtInfo_test = {
+      'name': "test commitment!",
+      'cron': "* * * * * *",
+      'etc': ""
+    }
+    let cmt = new Commitment(this, this.schedule, messageInfo_test, {});
 
     this.commands['CT'] = () => {
 
-      this.log(""+cmt.getInfo());
+      // this.log(""+cmt.getInfo());
 
       cmt.onSuccess();
     }
