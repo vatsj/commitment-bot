@@ -22,6 +22,12 @@ module.exports = class ScheduledEvent {
     this.cron = schedule_info['cron'];
   }
 
+  delete() {
+
+    this.unschedule_event();
+    // call finalize (destructor) method?
+  }
+
   schedule_event() {
     this.job = this.schedule.scheduleJob(this.cron, this.event);
   }

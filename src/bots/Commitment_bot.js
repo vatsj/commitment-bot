@@ -28,7 +28,7 @@ module.exports = class Commitment_bot extends Bot {
 
     // TESTING: running test fn after 1 second
     setTimeout(() => {
-      this.commitment_test();
+      // this.commitment_test();
     }, 1000);
   }
 
@@ -43,6 +43,32 @@ module.exports = class Commitment_bot extends Bot {
     let commands = super.initCommands();
 
     // TODO: add more commands (specific to C_bot)
+    commands['commit-create'] = (args, messageInfo) => {
+
+      // test value
+      let schedule_info = {
+        'name': "test commitment!",
+        'cron': "* * * * * *",
+        'etc': ""
+      };
+      let cmt_info = messageInfo;
+
+      let cmt = new Commitment(this, this.schedule, schedule_info, cmt_info);
+      this.commitments[schedule_info['name']] = cmt;
+    }
+
+    commands['commit-delete'] = (args, messageInfo) => {
+
+      // test value
+      // real value will be included in args
+      let name = "test commitment!";
+
+      // getting the cmt from args
+      let cmt = this.commitments[name];
+      // substitute with more general delete() fn?
+      cmt.delete();
+      delete this.commitments[name];
+    }
 
     return commands;
   }

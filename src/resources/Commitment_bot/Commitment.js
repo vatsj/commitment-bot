@@ -51,7 +51,6 @@ module.exports = class Commitment extends ScheduledEvent{
 
   // determines reaction based on whether commitment is fulfilled
   onSuccess() {
-
     this.say("good job m8");
   }
   onFailure() {
