@@ -43,6 +43,26 @@ module.exports = class Commitment_bot extends Bot {
     let commands = super.initCommands();
 
     // TODO: add more commands (specific to C_bot)
+
+    commands['commit-format'] = (args, messageInfo) => {
+
+      // return message
+      let content = "Use the following command to generate a commitment:\n";
+
+      // adds in the example command
+      content += "!commit-create ";
+
+      let scheduleInfo_example = {
+        'name': "[COMMITMENT NAME]",
+        'time': "[TIME INTERVAL FOR COMPLETION]",
+        'etc': ""
+      };
+
+      content += JSON.stringify(scheduleInfo_example, null, 2);
+
+      this.say(content);
+    }
+
     commands['commit-create'] = (args, messageInfo) => {
 
       // test value

@@ -36,7 +36,7 @@ module.exports = class Bot {
 
     commands['info'] = (args, messageInfo) => {
 
-      let info = JSON.stringify(messageInfo);
+      let info = JSON.stringify(messageInfo, null, 2);
 
       this.log(info);
       this.say(info);
@@ -77,10 +77,21 @@ module.exports = class Bot {
           'message': message,
           'evt': evt
         };
-        var args = message.substring(1).split(' ');
 
-        var cmd = args[0];
-        args = args.splice(1);
+        // splits up args by spaces
+        // var args = message.substring(1).split(' ');
+        //
+        // var cmd = args[0];
+        // args = args.splice(1);
+
+        // takes the entire non-cmd string as argt
+        let split = message.indexOf(' ');
+        if (split == -1) {
+          split = message.length;
+        }
+        var cmd = message.substring(1, split);
+        var args = message.substring(split);
+        // this.log(cmd + " ~~ then ~~ " + args);
 
         if (! (cmd in this.commands)) {
           cmd = 'error'

@@ -48,9 +48,9 @@ module.exports = class ScheduledEvent {
     content += JSON.stringify({
       'schedule': this.schedule,
       'etc': ''
-    });
+    }, null, 2);
 
-    content += "\n" + JSON.stringify(this.schedule_info);
+    content += "\n" + JSON.stringify(this.schedule_info, null, 2);
 
     return content;
   }

@@ -67,9 +67,9 @@ module.exports = class Commitment extends ScheduledEvent{
       // 'user': this.user,
       // 'channelID': this.channelID,
       'etc': ''
-    });
+    }, null, 2);
 
-    content += "\n\n" + JSON.stringify(this.cmt_info);
+    content += "\n\n" + JSON.stringify(this.cmt_info, null, 2);
 
     return content;
   }
