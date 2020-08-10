@@ -28,7 +28,7 @@ module.exports = class Commitment_bot extends Bot {
 
     // TESTING: running test fn after 1 second
     setTimeout(() => {
-      // this.commitment_test();
+      this.commitment_test();
     }, 1000);
   }
 
@@ -75,6 +75,8 @@ module.exports = class Commitment_bot extends Bot {
       let user = cmt_info['user'];
       let name = schedule_info['name'];
       this.set_cmt(user, name, cmt);
+
+      this.say("commitment successfully created");
     }
 
     commands['commit-delete'] = (args, messageInfo) => {
@@ -89,6 +91,8 @@ module.exports = class Commitment_bot extends Bot {
       // substitute with more general delete() fn?
       cmt.delete();
       this.set_cmt(user, name, null);
+
+      this.say("commitment successfully deleted");
     }
 
     commands['commit-edit'] = (args, messageInfo) => {
@@ -102,6 +106,8 @@ module.exports = class Commitment_bot extends Bot {
       let cmt = this.get_cmt(user, name);
       cmt.extract_edit(schedule_info);
       // this.commitments[schedule_info['name']] = cmt;
+
+      this.say("commitment successfully edited");
 
     }
 
@@ -156,18 +162,26 @@ module.exports = class Commitment_bot extends Bot {
 
     // 'etc''s added in for ease of commenting out lines
     let scheduleInfo_test = {
-      'name': "test commitment!",
-      'cron': "* * * * * *",
-      'etc': ""
+      "name": "test",
+      "cron": "* * * * * *",
+      "etc": ""
     }
-    let cmt = new Commitment(this, this.schedule, scheduleInfo_test, messageInfo_test);
 
-    this.commands['CT'] = () => {
+    let schedule_info = JSON.stringify(scheduleInfo_test);
+    let cmt_info = messageInfo_test
 
-      this.log(cmt.getInfo());
+    // let cmt = new Commitment(this, this.schedule, schedule_info, messageInfo_test);
 
-      cmt.onSuccess();
+    this.commands['CT'] = (args, messageInfo) => {
+
+      this.commands['commit-create'](schedule_info, cmt_info);
+      this.commands['commit-info']("test", cmt_info);
+      this.commands['commit-edit'](schedule_info, cmt_info);
+      this.commands['commit-delete']("test", cmt_info);
     }
+
+    // auto-runs the function
+    this.commands['CT'](null, null);
   }
 
 }
