@@ -90,7 +90,7 @@ module.exports = class Bot {
           split = message.length;
         }
         var cmd = message.substring(1, split);
-        var args = message.substring(split);
+        var args = message.substring(split + 1);
         // this.log(cmd + " ~~ then ~~ " + args);
 
         if (! (cmd in this.commands)) {

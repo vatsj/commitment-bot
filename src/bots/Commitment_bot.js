@@ -53,9 +53,9 @@ module.exports = class Commitment_bot extends Bot {
       content += "!commit-create ";
 
       let scheduleInfo_example = {
-        'name': "[COMMITMENT NAME]",
-        'time': "[TIME INTERVAL FOR COMPLETION]",
-        'etc': ""
+        "name": "[COMMITMENT NAME]",
+        "time": "[TIME INTERVAL FOR COMPLETION]",
+        "etc": ""
       };
 
       content += JSON.stringify(scheduleInfo_example, null, 2);
@@ -63,7 +63,7 @@ module.exports = class Commitment_bot extends Bot {
       this.say(content);
     }
 
-    commands['commit-create'] = (args, messageInfo) => {
+    commands['test-create'] = (args, messageInfo) => {
 
       // test value
       let schedule_info = {
@@ -71,6 +71,17 @@ module.exports = class Commitment_bot extends Bot {
         'cron': "* * * * * *",
         'etc': ""
       };
+      let cmt_info = messageInfo;
+
+      let cmt = new Commitment(this, this.schedule, schedule_info, cmt_info);
+      this.commitments[schedule_info['name']] = cmt;
+    }
+
+    commands['commit-create'] = (args, messageInfo) => {
+
+      // parsing JSON arg
+      this.log(args);
+      let schedule_info = JSON.parse(args);
       let cmt_info = messageInfo;
 
       let cmt = new Commitment(this, this.schedule, schedule_info, cmt_info);
