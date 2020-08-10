@@ -63,20 +63,6 @@ module.exports = class Commitment_bot extends Bot {
       this.say(content);
     }
 
-    commands['test-create'] = (args, messageInfo) => {
-
-      // test value
-      let schedule_info = {
-        'name': "test commitment!",
-        'cron': "* * * * * *",
-        'etc': ""
-      };
-      let cmt_info = messageInfo;
-
-      let cmt = new Commitment(this, this.schedule, schedule_info, cmt_info);
-      this.commitments[schedule_info['name']] = cmt;
-    }
-
     commands['commit-create'] = (args, messageInfo) => {
 
       // parsing JSON arg
@@ -85,31 +71,50 @@ module.exports = class Commitment_bot extends Bot {
       let cmt_info = messageInfo;
 
       let cmt = new Commitment(this, this.schedule, schedule_info, cmt_info);
-      this.commitments[schedule_info['name']] = cmt;
-    }
 
-    commands['test-delete'] = (args, messageInfo) => {
-
-      // test value
-      // real value will be included in args
-      let name = "test commitment!";
-
-      // getting the cmt from args
-      let cmt = this.commitments[name];
-      // substitute with more general delete() fn?
-      cmt.delete();
-      delete this.commitments[name];
+      let user = cmt_info['user'];
+      let name = schedule_info['name'];
+      this.set_cmt(user, name, cmt);
     }
 
     commands['commit-delete'] = (args, messageInfo) => {
 
+      let user = messageInfo['user'];
       let name = args;
 
-      // getting the cmt from args
-      let cmt = this.commitments[name];
+      // getting the cmt from this.commitments
+      let cmt = this.get_cmt(user, name);
+      // let cmt = this.commitments[name];
+
       // substitute with more general delete() fn?
       cmt.delete();
-      delete this.commitments[name];
+      this.set_cmt(user, name, null);
+    }
+
+    commands['commit-edit'] = (args, messageInfo) => {
+
+      let schedule_info = JSON.parse(args);
+      let cmt_info = messageInfo;
+
+      let user = cmt_info['user'];
+      let name = schedule_info['name'];
+
+      let cmt = this.get_cmt(user, name);
+      cmt.extract_edit(schedule_info);
+      // this.commitments[schedule_info['name']] = cmt;
+
+    }
+
+    // currently broken; JSON contains itself
+    commands['commit-info'] = (args, messageInfo) => {
+
+      let user = messageInfo['user'];
+      let name = args;
+
+      // getting the cmt from this.commitments
+      let cmt = this.get_cmt(user, name);
+
+      this.say(cmt.getInfo());
     }
 
     return commands;
@@ -118,7 +123,33 @@ module.exports = class Commitment_bot extends Bot {
   addSchedule(schedule) {
 
     this.schedule = schedule;
-    this.log("schedule added!");
+  }
+
+  get_cmt(user, name) {
+
+    // searches for commitment, returns if found
+    if (user in this.commitments) {
+      if (name in this.commitments[user]) {
+        let cmt = this.commitments[user][name];
+
+        if (cmt) {
+          return cmt;
+        }
+      }
+    }
+
+    // otherwise, throw an error
+    this.log("commitment not found!");
+  }
+
+  set_cmt(user, name, cmt) {
+
+    // initializes the cmt dict for that person
+    if (! (user in this.commitments)) {
+      this.commitments[user] = {};
+    }
+
+    this.commitments[user][name] = cmt;
   }
 
   commitment_test() {

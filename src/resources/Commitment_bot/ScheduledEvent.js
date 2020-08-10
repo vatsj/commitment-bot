@@ -22,6 +22,23 @@ module.exports = class ScheduledEvent {
     this.cron = schedule_info['cron'];
   }
 
+  extract_edit(edit_info) {
+
+    let schedule_info = this.schedule_info;
+
+    // overwriting object info with edit info
+    for (let key in schedule_info) {
+      if (key in edit_info) {
+        schedule_info[key] = edit_info[key];
+      }
+    }
+
+    this.extract_schedule_info(schedule_info);
+    this.reschedule_event();
+  }
+
+  // add time2cron method!
+
   delete() {
 
     this.unschedule_event();
@@ -36,6 +53,11 @@ module.exports = class ScheduledEvent {
     this.job.cancel();
   }
 
+  reschedule_event() {
+    this.unschedule_event();
+    this.schedule_event();
+  }
+
   event() {
     // the thing the schedule calls
     // to be filled in based on the class
@@ -45,10 +67,11 @@ module.exports = class ScheduledEvent {
 
     let content = "";
 
-    content += JSON.stringify({
+    let misc_info = {
       'schedule': this.schedule,
       'etc': ''
-    }, null, 2);
+    }
+    content += JSON.stringify(misc_info, null, 2);
 
     content += "\n" + JSON.stringify(this.schedule_info, null, 2);
 
