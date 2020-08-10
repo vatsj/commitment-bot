@@ -88,11 +88,22 @@ module.exports = class Commitment_bot extends Bot {
       this.commitments[schedule_info['name']] = cmt;
     }
 
-    commands['commit-delete'] = (args, messageInfo) => {
+    commands['test-delete'] = (args, messageInfo) => {
 
       // test value
       // real value will be included in args
       let name = "test commitment!";
+
+      // getting the cmt from args
+      let cmt = this.commitments[name];
+      // substitute with more general delete() fn?
+      cmt.delete();
+      delete this.commitments[name];
+    }
+
+    commands['commit-delete'] = (args, messageInfo) => {
+
+      let name = args;
 
       // getting the cmt from args
       let cmt = this.commitments[name];
