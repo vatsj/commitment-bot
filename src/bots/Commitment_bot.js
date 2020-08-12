@@ -89,10 +89,15 @@ module.exports = class Commitment_bot extends Bot {
       // let cmt = this.commitments[name];
 
       // substitute with more general delete() fn?
-      cmt.delete();
-      this.set_cmt(user, name, null);
+      if (cmt) {
+        cmt.delete();
+        this.set_cmt(user, name, null);
 
-      this.say("commitment successfully deleted");
+        this.say("commitment successfully deleted");
+      } else {
+        this.say("error: commitment name not found!");
+      }
+
     }
 
     commands['commit-edit'] = (args, messageInfo) => {
@@ -146,6 +151,7 @@ module.exports = class Commitment_bot extends Bot {
 
     // otherwise, throw an error
     this.log("commitment not found!");
+    return null;
   }
 
   set_cmt(user, name, cmt) {
@@ -170,14 +176,21 @@ module.exports = class Commitment_bot extends Bot {
     let schedule_info = JSON.stringify(scheduleInfo_test);
     let cmt_info = messageInfo_test
 
+    this.channelID = messageInfo_test['channelID'];
+
     // let cmt = new Commitment(this, this.schedule, schedule_info, messageInfo_test);
 
     this.commands['CT'] = (args, messageInfo) => {
 
-      this.commands['commit-create'](schedule_info, cmt_info);
-      this.commands['commit-info']("test", cmt_info);
-      this.commands['commit-edit'](schedule_info, cmt_info);
-      this.commands['commit-delete']("test", cmt_info);
+      let commands = [];
+
+      commands.push(() => {this.commands['commit-create'](schedule_info, cmt_info)});
+      commands.push(() => {this.commands['commit-info']("test", cmt_info)});
+      commands.push(() => {this.commands['commit-edit'](schedule_info, cmt_info)});
+      commands.push(() => {this.commands['commit-delete']("test", cmt_info)});
+
+      // this.log("commands: "+commands);
+      this.stutter_exec(commands);
     }
 
     // auto-runs the function

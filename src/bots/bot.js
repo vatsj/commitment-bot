@@ -1,6 +1,7 @@
 module.exports = class Bot {
 
   constructor(discordBot, logger) {
+
     this.discordBot = discordBot;
     this.logger = logger;
 
@@ -98,10 +99,12 @@ module.exports = class Bot {
         }
 
         // hacky default for this.say
-        // might mistakenlysend messages to wrong channel
+        // might mistakenly send messages to wrong channel
         this.channelID = channelID;
 
-        this.commands[cmd](args, messageInfo);
+        let cmd_fn = this.commands[cmd];
+        cmd_fn = cmd_fn.bind(this);
+        cmd_fn(args, messageInfo);
      }
   }
 
@@ -116,4 +119,26 @@ module.exports = class Bot {
     this.logger.info(content);
   }
 
+  // test method; logs and says content
+  shout(content) {
+    this.log(content);
+    this.say(content);
+  }
+
+  // test method
+  // runs a sequence of fns with a time interval between each
+  stutter_exec(commands, dt = 1000) {
+
+    let count = 0;
+
+    commands.forEach((fn) => {
+      count++;
+
+      fn = fn.bind(this);
+      // this.log("fn: "+fn);
+      setTimeout(() => {
+        fn();
+      }, count*dt);
+    })
+  }
 }

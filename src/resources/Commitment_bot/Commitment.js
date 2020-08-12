@@ -30,7 +30,7 @@ module.exports = class Commitment extends ScheduledEvent{
   event() {
 
     // logs that the fn is called
-    this.log("\nscheduled event: checking cmt fulfillment\n");
+    // this.log("\nscheduled event: checking cmt fulfillment\n");
 
     if (! this.fulfilled) {
       this.onFailure();
