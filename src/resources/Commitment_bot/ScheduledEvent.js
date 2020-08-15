@@ -1,6 +1,10 @@
 module.exports = class ScheduledEvent {
 
-  constructor (schedule, schedule_info) {
+  // adding speaker arg for test logging
+  constructor (schedule, schedule_info, speaker = null) {
+
+    // pulling a global var
+    this.speaker = speaker;
 
     this.schedule = schedule;
 
@@ -54,38 +58,77 @@ module.exports = class ScheduledEvent {
     let unit = time[1];
 
     // cleaning up unit formatting
-    unit = unit.toLowerCase;
+    unit = unit.toLowerCase();
     if (unit[unit.length - 1] == 's') {
       unit = unit.substring(0, unit.length - 2);
     }
 
-    this.speaker.shout(num + ", " + unit);
+    this.speaker.shout("num: "+num+", unit: "+unit);
 
     // converts the time to cron format
-    this.cron_elts = {
-      "second": '*',
-      "minute": '*',
-      "hour": '*',
-      "day": '*',
-      "week": '*',
-      "year": '*'
+
+    // this.cron_elts = {
+    //   "second": '*',
+    //   "minute": '*',
+    //   "hour": '*',
+    //   "day": '*',
+    //   "week": '*',
+    //   "year": '*'
+    // }
+
+    this.cron_elts = [
+      "year",
+      "week",
+      "day",
+      "hour",
+      "minute",
+      "second"
+    ];
+
+    let cron_JSON = {};
+    let cron_elt = null;
+    let timeSet = false;
+    for (let i = 0; i < this.cron_elts.length; i++) {
+
+      let currUnit = this.cron_elts[i];
+
+      this.speaker.log("unit: "+unit+", "+"currUnit: "+currUnit);
+      if (unit == currUnit) {
+        cron_elt = "*/" + num;
+        timeSet = true;
+      } else if (timeSet) {
+        cron_elt = "0";
+      } else {
+        cron_elt = "*";
+      }
+
+      // cron_builder.push(cron_elt);
+      cron_JSON[currUnit] = cron_elt;
     }
 
-    if (unit in this.cron_elts) {
-      this.cron_elts[unit] = "*/" + num;
-    } else {
-      this.speaker.shout("error: time unit not recognized")
+    this.speaker.shout(JSON.stringify(cron_JSON, null, 2));
+
+    if (! timeSet) {
+      throw("error: time unit not recognized");
     }
 
+    // if (unit in this.cron_elts) {
+    //   this.cron_elts[unit] = "*/" + num;
+    // } else {
+    //   this.speaker.shout("error: time unit not recognized")
+    // }
+    //
     // processing cron value from JSON
     let cron = "" +
-    this.cron_elts['second'] + " " +
-    this.cron_elts['minute'] + " " +
-    this.cron_elts['hour'] + " " +
-    this.cron_elts['day'] + " " +
-    this.cron_elts['week'] + " " +
-    this.cron_elts['year'] + " " +
-    "";
+    cron_JSON['second'] + " " +
+    cron_JSON['minute'] + " " +
+    cron_JSON['hour'] + " " +
+    cron_JSON['day'] + " " +
+    cron_JSON['week'] + " " +
+    cron_JSON['year'];
+
+    this.speaker.shout("cron: "+cron);
+
 
     return cron;
   }

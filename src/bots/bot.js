@@ -13,6 +13,8 @@ module.exports = class Bot {
 
     // creating a Speaker to handle output
     this.speaker = new Speaker(this.discordBot, this.logger);
+    // temporarily making speaker a global var
+    // var speaker = this.speaker;
 
     // testing
     this.logger.info("Bot initialized");

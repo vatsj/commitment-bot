@@ -5,11 +5,11 @@ module.exports = class Commitment extends ScheduledEvent{
 
   constructor(bot, schedule, schedule_info, cmt_info) {
     // defines a ScheduledEvemt to evaluate the cmt
-    super(schedule, schedule_info);
+    super(schedule, schedule_info, bot.speaker);
 
     // info about bot, to return messages
     this.bot = bot;
-    this.speaker = bot.speaker;
+    this.speaker = this.bot.speaker;
 
     // this.extract_message_info(message_info);
     this.extract_cmt_info(cmt_info);
