@@ -9,6 +9,7 @@ module.exports = class Commitment extends ScheduledEvent{
 
     // info about bot, to return messages
     this.bot = bot;
+    this.speaker = bot.speaker;
 
     // this.extract_message_info(message_info);
     this.extract_cmt_info(cmt_info);
@@ -30,7 +31,7 @@ module.exports = class Commitment extends ScheduledEvent{
   event() {
 
     // logs that the fn is called
-    // this.log("\nscheduled event: checking cmt fulfillment\n");
+    // this.speaker.log("\nscheduled event: checking cmt fulfillment\n");
 
     if (! this.fulfilled) {
       this.onFailure();
@@ -51,10 +52,10 @@ module.exports = class Commitment extends ScheduledEvent{
 
   // determines reaction based on whether commitment is fulfilled
   onSuccess() {
-    this.say("good job m8");
+    this.speaker.say("good job m8");
   }
   onFailure() {
-    this.say("B A d DO THE THING");
+    this.speaker.say("B A d DO THE THING");
   }
 
   // test method
@@ -77,11 +78,11 @@ module.exports = class Commitment extends ScheduledEvent{
 
   // say(content) method, similar to Bot.js say()
   // piggybacks off of Bot.say() using default channelID
-  say(content) {
-    this.bot.say(content, this.channelID);
-  }
-  log(content) {
-    this.bot.log(content);
-  }
+  // say(content) {
+  //   this.bot.say(content, this.channelID);
+  // }
+  // log(content) {
+  //   this.bot.log(content);
+  // }
 
 }

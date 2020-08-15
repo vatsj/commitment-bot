@@ -60,26 +60,58 @@ module.exports = class Commitment_bot extends Bot {
 
       content += JSON.stringify(scheduleInfo_example, null, 2);
 
-      this.say(content);
+      this.speaker.say(content);
     }
 
+    this.commands_help['commit-list'] = "lists all commitments you've set";
+    commands['commit-list'] = (args, messageInfo) => {
+
+      // return message
+      let content = "Here all commitments you have active:\n";
+
+      // adds in each commitment
+      let user = messageInfo['user'];
+      for (let key in this.commitments[user]) {
+        content += this.commitments[user][key].getInfo_pretty();
+      }
+
+      this.speaker.say(content);
+    }
+
+    this.commands_help['commit-create'] = "creates a commitment";
     commands['commit-create'] = (args, messageInfo) => {
 
+      // help arg clause
+      if (args.trim().toLowerCase() == "help") {
+        this.speaker.say("c'mon...");
+        return null;
+      }
+
       // parsing JSON arg
-      this.log(args);
+      this.speaker.log(args);
       let schedule_info = JSON.parse(args);
       let cmt_info = messageInfo;
 
-      let cmt = new Commitment(this, this.schedule, schedule_info, cmt_info);
-
       let user = cmt_info['user'];
       let name = schedule_info['name'];
-      this.set_cmt(user, name, cmt);
+      if (this.get_cmt(user, name)) {
+        this.speaker.say("error: commitment already exists with the same name");
+      } else{
+        let cmt = new Commitment(this, this.schedule, schedule_info, cmt_info);
+        this.set_cmt(user, name, cmt);
 
-      this.say("commitment successfully created");
+        this.speaker.say("commitment successfully created");
+      }
     }
 
+    this.commands_help['commit-delete'] = "deletes an already existing commitment";
     commands['commit-delete'] = (args, messageInfo) => {
+
+      // help arg clause
+      if (args.trim().toLowerCase() == "help") {
+        this.speaker.say("c'mon...");
+        return null;
+      }
 
       let user = messageInfo['user'];
       let name = args;
@@ -93,14 +125,21 @@ module.exports = class Commitment_bot extends Bot {
         cmt.delete();
         this.set_cmt(user, name, null);
 
-        this.say("commitment successfully deleted");
+        this.speaker.say("commitment successfully deleted");
       } else {
-        this.say("error: commitment name not found!");
+        this.speaker.say("error: commitment name not found!");
       }
 
     }
 
+    this.commands_help['commit-edit'] = "edits an already existing commitment";
     commands['commit-edit'] = (args, messageInfo) => {
+
+      // help arg clause
+      if (args.trim().toLowerCase() == "help") {
+        this.speaker.say("c'mon...");
+        return null;
+      }
 
       let schedule_info = JSON.parse(args);
       let cmt_info = messageInfo;
@@ -109,15 +148,25 @@ module.exports = class Commitment_bot extends Bot {
       let name = schedule_info['name'];
 
       let cmt = this.get_cmt(user, name);
-      cmt.extract_edit(schedule_info);
-      // this.commitments[schedule_info['name']] = cmt;
 
-      this.say("commitment successfully edited");
+      if (cmt) {
+        cmt.extract_edit(schedule_info);
+
+        this.speaker.say("commitment successfully edited");
+      } else {
+        this.speaker.say("error: commitment name not found!");
+      }
 
     }
 
-    // currently broken; JSON contains itself
+    this.commands_help['commit-info'] = "gives info about an already existing commitment";
     commands['commit-info'] = (args, messageInfo) => {
+
+      // help arg clause
+      if (args.trim().toLowerCase() == "help") {
+        this.speaker.say("c'mon...");
+        return null;
+      }
 
       let user = messageInfo['user'];
       let name = args;
@@ -125,7 +174,11 @@ module.exports = class Commitment_bot extends Bot {
       // getting the cmt from this.commitments
       let cmt = this.get_cmt(user, name);
 
-      this.say(cmt.getInfo());
+      if (cmt) {
+        this.speaker.say(cmt.getInfo());
+      } else {
+        this.speaker.say("error: commitment name not found!");
+      }
     }
 
     return commands;
@@ -150,7 +203,7 @@ module.exports = class Commitment_bot extends Bot {
     }
 
     // otherwise, throw an error
-    this.log("commitment not found!");
+    this.speaker.log("cmt not found");
     return null;
   }
 
@@ -161,7 +214,13 @@ module.exports = class Commitment_bot extends Bot {
       this.commitments[user] = {};
     }
 
-    this.commitments[user][name] = cmt;
+    if (cmt) {
+      this.commitments[user][name] = cmt;
+    } else {
+      // deletes cmt property if being set to null
+      delete this.commitments[user][name];
+    }
+
   }
 
   commitment_test() {
@@ -189,12 +248,12 @@ module.exports = class Commitment_bot extends Bot {
       commands.push(() => {this.commands['commit-edit'](schedule_info, cmt_info)});
       commands.push(() => {this.commands['commit-delete']("test", cmt_info)});
 
-      // this.log("commands: "+commands);
+      // this.speaker.log("commands: "+commands);
       this.stutter_exec(commands);
     }
 
     // auto-runs the function
-    this.commands['CT'](null, null);
+    // this.commands['CT'](null, null);
   }
 
 }

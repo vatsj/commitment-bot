@@ -4,6 +4,7 @@
 var rootDir = "./..";
 var node_modules_dir = rootDir + "/node_modules"
 var bots_dir = rootDir + "/src/bots";
+var resources_dir
 
 // import npm resources
 var Discord = require('discord.io');

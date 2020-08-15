@@ -1,9 +1,18 @@
+// imports class-specific resources
+var rootDir = "./../..";
+var bot_resources = rootDir + "/src/resources/Bot";
+
+var Speaker = require(bot_resources + "/Speaker.js");
+
 module.exports = class Bot {
 
   constructor(discordBot, logger) {
 
     this.discordBot = discordBot;
     this.logger = logger;
+
+    // creating a Speaker to handle output
+    this.speaker = new Speaker(this.discordBot, this.logger);
 
     // testing
     this.logger.info("Bot initialized");
@@ -14,6 +23,9 @@ module.exports = class Bot {
 
     // initialize commands, for respond() function
     this.commands = this.initCommands();
+
+    // adds ability to run test command
+    this.addTestCommand();
 
     this.discordBot.on('ready', this.onBotLogin);
     this.discordBot.on('message', this.respond);
@@ -29,26 +41,46 @@ module.exports = class Bot {
   initCommands() {
     // creates a json object to store commands
     let commands = { };
+    this.commands_help = { };
 
     // test command: 'ping' --> say('pong')
+    this.commands_help['ping'] = "pongs";
     commands['ping'] = (args, messageInfo) => {
-      this.say(':B:ong!');
+      // help arg clause
+      if (args.trim().toLowerCase() == "help") {
+        this.speaker.say("c'mon...");
+        return null;
+      }
+
+      this.speaker.say(':B:ong!');
     }
 
+    this.commands_help['info'] = "gives info about the user/message";
     commands['info'] = (args, messageInfo) => {
 
       let info = JSON.stringify(messageInfo, null, 2);
 
-      this.log(info);
-      this.say(info);
+      this.speaker.shout(info);
     }
 
+    this.commands_help['indentity'] = "gives the type of bot processing commands";
     commands['identity'] = (args, messageInfo) => {
-      this.say('I am the following class of bot:\t'+ this.identity());
+      this.speaker.say('I am the following class of bot:\t'+ this.identity());
+    }
+
+    this.commands_help['help'] = "gives information about all commands";
+    commands['help'] = (args, messageInfo) => {
+      let content = "Here's a list of all keyword-command pairs:\n";
+
+      content += JSON.stringify(this.commands_help, null, 2);
+
+      content += `\nto use a command, use the '!' character followed by the command keyword.
+      \nfor more information on a specific command, add ' help' to the end of that command.`
+      this.speaker.say(content);
     }
 
     commands['error'] = (args, messageInfo) => {
-      this.say('error: command not found');
+      this.speaker.say('error: command not found');
     }
 
     return commands;
@@ -65,7 +97,7 @@ module.exports = class Bot {
   testRespond(user, userID, channelID, message, evt) {
     // default response, for testing
     if (message.substring(0, 1) == '!') {
-      this.say(channelID, "beep!");
+      this.speaker.say(channelID, "beep!");
     }
   }
 
@@ -98,31 +130,32 @@ module.exports = class Bot {
           cmd = 'error'
         }
 
-        // hacky default for this.say
+        // hacky default for speaker.say
         // might mistakenly send messages to wrong channel
-        this.channelID = channelID;
+        // this.channelID = channelID;
+        this.speaker.setDefaultChannel(channelID);
 
         let cmd_fn = this.commands[cmd];
         cmd_fn = cmd_fn.bind(this);
-        cmd_fn(args, messageInfo);
+
+        // try/catch to handle command fn errors
+        try {
+          cmd_fn(args, messageInfo);
+        } catch (e) {
+          console.error(e);
+          this.speaker.say("error: command failed to execute");
+        }
+
      }
   }
 
-  say(content, channelID = this.channelID) {
-    this.discordBot.sendMessage({
-        to: channelID,
-        message: content
-    });
-  }
+  // used for testing
+  addTestCommand() {
 
-  log(content) {
-    this.logger.info(content);
-  }
+    this.commands['test'] = (args, messageInfo) => {
 
-  // test method; logs and says content
-  shout(content) {
-    this.log(content);
-    this.say(content);
+      this.speaker.shout("speaker -- shout")
+    }
   }
 
   // test method
@@ -141,4 +174,23 @@ module.exports = class Bot {
       }, count*dt);
     })
   }
+
+  // speaker methods
+  // TO BE MOVED TO SPEAKER.JS
+  // say(content, channelID = this.channelID) {
+  //   this.discordBot.sendMessage({
+  //       to: channelID,
+  //       message: content
+  //   });
+  // }
+  //
+  // log(content) {
+  //   this.logger.info(content);
+  // }
+  //
+  // // test method; logs and says content
+  // shout(content) {
+  //   this.log(content);
+  //   this.say(content);
+  // }
 }
