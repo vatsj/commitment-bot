@@ -3,7 +3,7 @@ var ScheduledEvent = require("./ScheduledEvent.js");
 
 module.exports = class Commitment extends ScheduledEvent{
 
-  constructor(bot, schedule, schedule_info, cmt_info) {
+  constructor(bot, schedule, schedule_info, base_message) {
     // defines a ScheduledEvemt to evaluate the cmt
     super(schedule, schedule_info, bot.speaker);
 
@@ -12,21 +12,19 @@ module.exports = class Commitment extends ScheduledEvent{
     this.speaker = this.bot.speaker;
 
     // this.extract_message_info(message_info);
-    this.extract_cmt_info(cmt_info);
+    this.extract_base_message(base_message);
 
   }
 
-  extract_cmt_info(cmt_info) {
+  extract_base_message(base_message) {
 
-    this.cmt_info = cmt_info
+    this.base_message = base_message
 
     // encodes info about who/where the commitment is for
-    this.channelID = cmt_info['channelID'];
-    this.user = cmt_info.evt.d.author;
+    this.channel = base_message.channel;
+    this.author = base_message.author;
 
-    // this.author = cmt_info['evt']['d']['author'];
-    this.author = this.user;
-    this.speaker.shout("author: "+this.speaker.tag(this.author));
+    // this.speaker.shout("author: "+this.speaker.tag(this.author));
   }
 
 
@@ -57,11 +55,11 @@ module.exports = class Commitment extends ScheduledEvent{
   // determines reaction based on whether commitment is fulfilled
   onSuccess() {
     let message = "good job m8"
-    this.speaker.say(this.author + message);
+    this.speaker.say(this.speaker.tag(this.author) + message);
   }
   onFailure() {
     let message = "B A d DO THE THING";
-    this.speaker.say(this.author + message);
+    this.speaker.say(this.speaker.tag(this.author) + message);
   }
 
   // test method
@@ -77,7 +75,7 @@ module.exports = class Commitment extends ScheduledEvent{
     // }
     // content += JSON.stringify(misc_info, null, 2);
 
-    content += "\n\n" + JSON.stringify(this.cmt_info, null, 2);
+    content += "\n\n" + JSON.stringify(this.base_message, null, 2);
 
     return content;
   }

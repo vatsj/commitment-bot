@@ -1,21 +1,18 @@
 module.exports = class Speaker {
 
-  constructor(discordBot, logger) {
+  constructor(client, logger) {
 
-    this.discordBot = discordBot;
+    this.client = client;
     this.logger = logger;
   }
 
-  setDefaultChannel(channelID) {
-    this.channelID_default = channelID;
+  setDefaultChannel(channel) {
+    this.channel_default = channel;
   }
 
   // speaker methods
-  say(content, channelID = this.channelID_default) {
-    this.discordBot.sendMessage({
-        to: channelID,
-        message: content
-    });
+  say(content, channel = this.channel_default) {
+    channel.send(content)
   }
 
   log(content) {
@@ -28,8 +25,9 @@ module.exports = class Speaker {
     this.say(content);
   }
 
+  // might be easy in Discord.js, which would render this fn unnecessary
   tag(user) {
-    let tag = "<" + user.username + "#" + user.discriminator + ">";
+    let tag = user.toString();
     return tag;
   }
 

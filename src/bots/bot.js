@@ -6,13 +6,13 @@ var Speaker = require(bot_resources + "/Speaker.js");
 
 module.exports = class Bot {
 
-  constructor(discordBot, logger) {
+  constructor(client, logger) {
 
-    this.discordBot = discordBot;
+    this.client = client;
     this.logger = logger;
 
     // creating a Speaker to handle output
-    this.speaker = new Speaker(this.discordBot, this.logger);
+    this.speaker = new Speaker(this.client, this.logger);
 
     // binds
     this.onBotLogin = this.onBotLogin.bind(this);
@@ -24,15 +24,19 @@ module.exports = class Bot {
     // adds ability to run test command
     this.addTestCommand();
 
-    this.discordBot.on('ready', this.onBotLogin);
-    this.discordBot.on('message', this.respond);
+    this.client.on('ready', this.onBotLogin);
+    this.client.on('message', this.respond);
   }
 
-  // run once discordBot logs in
+  // run once client logs in
   onBotLogin(evt) {
-    this.logger.info('Connected');
-    this.logger.info('Logged in as: ');
-    this.logger.info(this.discordBot.username + ' - (' + this.discordBot.id + ')');
+    this.speaker.log('Connected');
+    this.speaker.log('Logged in as: ');
+
+    let user = this.client.user;
+    this.speaker.log(user.username + " (ID: "+user.ID+")");
+    // add actual login info!!!!
+    // this.logger.info(this.client.username + ' - (' + this.client.id + ')');
   }
 
   initCommands() {
@@ -42,7 +46,7 @@ module.exports = class Bot {
 
     // test command: 'ping' --> say('pong')
     this.commands_help['ping'] = "pongs";
-    commands['ping'] = (args, messageInfo) => {
+    commands['ping'] = (args, message) => {
       // help arg clause
       if (args.trim().toLowerCase() == "help") {
         this.speaker.say("c'mon...");
@@ -53,20 +57,19 @@ module.exports = class Bot {
     }
 
     this.commands_help['info'] = "gives info about the user/message";
-    commands['info'] = (args, messageInfo) => {
+    commands['info'] = (args, message) => {
 
-      let info = JSON.stringify(messageInfo, null, 2);
-
+      let info = JSON.stringify(message, null, 2);
       this.speaker.shout(info);
     }
 
     this.commands_help['indentity'] = "gives the type of bot processing commands";
-    commands['identity'] = (args, messageInfo) => {
+    commands['identity'] = (args, message) => {
       this.speaker.say('I am the following class of bot:\t'+ this.identity());
     }
 
     this.commands_help['help'] = "gives information about all commands";
-    commands['help'] = (args, messageInfo) => {
+    commands['help'] = (args, message) => {
       let content = "Here's a list of all keyword-command pairs:\n";
 
       content += JSON.stringify(this.commands_help, null, 2);
@@ -76,7 +79,7 @@ module.exports = class Bot {
       this.speaker.say(content);
     }
 
-    commands['error'] = (args, messageInfo) => {
+    commands['error'] = (args, message) => {
       this.speaker.say('error: command not found');
     }
 
@@ -91,22 +94,27 @@ module.exports = class Bot {
   }
 
   // test method for respond functionality
-  testRespond(user, userID, channelID, message, evt) {
+  testRespond(message) {
+    let content = message.content;
+
     // default response, for testing
-    if (message.substring(0, 1) == '!') {
-      this.speaker.say(channelID, "beep!");
+    if (content.substring(0, 1) == '!') {
+      this.speaker.say(message.channel, "beep!");
     }
   }
 
-  respond(user, userID, channelID, message, evt) {
-    if (message.substring(0, 1) == '!') {
-        var messageInfo = {
-          'user': user,
-          'userID': userID,
-          'channelID': channelID,
-          'message': message,
-          'evt': evt
-        };
+  respond(message) {
+
+    let content = message.content;
+
+    if (content.substring(0, 1) == '!') {
+        // var messageInfo = {
+        //   'user': user,
+        //   'userID': userID,
+        //   'channelID': channelID,
+        //   'message': message,
+        //   'evt': evt
+        // };
 
         // splits up args by spaces
         // var args = message.substring(1).split(' ');
@@ -115,12 +123,12 @@ module.exports = class Bot {
         // args = args.splice(1);
 
         // takes the entire non-cmd string as argt
-        let split = message.indexOf(' ');
+        let split = content.indexOf(' ');
         if (split == -1) {
-          split = message.length;
+          split = content.length;
         }
-        var cmd = message.substring(1, split);
-        var args = message.substring(split + 1);
+        var cmd = content.substring(1, split);
+        var args = content.substring(split + 1);
         // this.log(cmd + " ~~ then ~~ " + args);
 
         if (! (cmd in this.commands)) {
@@ -129,15 +137,14 @@ module.exports = class Bot {
 
         // hacky default for speaker.say
         // might mistakenly send messages to wrong channel
-        // this.channelID = channelID;
-        this.speaker.setDefaultChannel(channelID);
+        this.speaker.setDefaultChannel(message.channel);
 
         let cmd_fn = this.commands[cmd];
         cmd_fn = cmd_fn.bind(this);
 
         // try/catch to handle command fn errors
         try {
-          cmd_fn(args, messageInfo);
+          cmd_fn(args, message);
         } catch (e) {
           console.error(e);
           this.speaker.say("error: command failed to execute");
@@ -149,13 +156,13 @@ module.exports = class Bot {
   // used for testing
   addTestCommand() {
 
-    this.commands['test'] = (args, messageInfo) => {
+    this.commands['test'] = (args, message) => {
 
       // let contentJSON = messageInfo['evt'];
       // let content = JSON.stringify(contentJSON, null, 2);
       // this.speaker.shout(content);
 
-      this.speaker.shout("@"+messageInfo['userID']);
+      // this.speaker.shout("@"+messageInfo['userID']);
     }
   }
 
@@ -179,7 +186,7 @@ module.exports = class Bot {
   // speaker methods
   // TO BE MOVED TO SPEAKER.JS
   // say(content, channelID = this.channelID) {
-  //   this.discordBot.sendMessage({
+  //   this.client.sendMessage({
   //       to: channelID,
   //       message: content
   //   });

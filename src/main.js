@@ -7,7 +7,7 @@ var bots_dir = rootDir + "/src/bots";
 var resources_dir
 
 // import npm resources
-var Discord = require('discord.io');
+var Discord = require('discord.js');
 var logger = require('winston');
 var schedule = require('node-schedule');
 
@@ -26,12 +26,10 @@ var Bot = require(bots_dir + "/Bot.js");
 var C_bot = require(bots_dir + "/Commitment_bot.js");
 
 // Initialize Discord Bot
-var discordBot = new Discord.Client({
-   token: auth.token,
-   autorun: true
-});
+var client = new Discord.Client();
+client.login(auth.token);
 
 // uses Bot class, to eventually be moved to Commitment-bot
-// var bot = new Bot(discordBot, logger);
-var c_bot = new C_bot(discordBot, logger);
+// var bot = new Bot(client, logger);
+var c_bot = new C_bot(client, logger);
 c_bot.addSchedule(schedule);

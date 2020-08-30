@@ -9,17 +9,17 @@ var bot_resources = rootDir + "/src/resources/Commitment_bot";
 var Commitment = require(bot_resources + "/Commitment.js");
 
 // imports resources specific to testing env
-var messageInfo_test = require(rootDir + "/json/secure/messageInfo_test.json");
+var message_test = require(rootDir + "/json/secure/message_test.json");
 
 module.exports = class Commitment_bot extends Bot {
 
   // TODO: add test commitment handler
   // TODO: add scheduler
 
-  constructor(discordBot, logger) {
+  constructor(client, logger) {
 
     // superclass (Bot.js) constructor
-    super(discordBot, logger);
+    super(client, logger);
 
     // TODO: add stuff for commitments/scheduling?
     // JSON storing commitments
@@ -44,7 +44,7 @@ module.exports = class Commitment_bot extends Bot {
 
     // TODO: add more commands (specific to C_bot)
 
-    commands['commit-format'] = (args, messageInfo) => {
+    commands['commit-format'] = (args, message) => {
 
       // return message
       let content = "Use the following command to generate a commitment:\n";
@@ -64,13 +64,13 @@ module.exports = class Commitment_bot extends Bot {
     }
 
     this.commands_help['commit-list'] = "lists all commitments you've set";
-    commands['commit-list'] = (args, messageInfo) => {
+    commands['commit-list'] = (args, message) => {
 
       // return message
       let content = "Here all commitments you have active:\n";
 
       // adds in each commitment
-      let user = messageInfo['user'];
+      let user = message['user'];
       for (let key in this.commitments[user]) {
         content += this.commitments[user][key].getInfo_pretty();
       }
@@ -79,7 +79,7 @@ module.exports = class Commitment_bot extends Bot {
     }
 
     this.commands_help['commit-create'] = "creates a commitment";
-    commands['commit-create'] = (args, messageInfo) => {
+    commands['commit-create'] = (args, message) => {
 
       // help arg clause
       if (args.trim().toLowerCase() == "help") {
@@ -90,7 +90,7 @@ module.exports = class Commitment_bot extends Bot {
       // parsing JSON arg
       this.speaker.log(args);
       let schedule_info = JSON.parse(args);
-      let cmt_info = messageInfo;
+      let cmt_info = message;
 
       let user = cmt_info['user'];
       let name = schedule_info['name'];
@@ -105,7 +105,7 @@ module.exports = class Commitment_bot extends Bot {
     }
 
     this.commands_help['commit-delete'] = "deletes an already existing commitment";
-    commands['commit-delete'] = (args, messageInfo) => {
+    commands['commit-delete'] = (args, message) => {
 
       // help arg clause
       if (args.trim().toLowerCase() == "help") {
@@ -113,7 +113,7 @@ module.exports = class Commitment_bot extends Bot {
         return null;
       }
 
-      let user = messageInfo['user'];
+      let user = message['user'];
       let name = args;
 
       // getting the cmt from this.commitments
@@ -133,7 +133,7 @@ module.exports = class Commitment_bot extends Bot {
     }
 
     this.commands_help['commit-edit'] = "edits an already existing commitment";
-    commands['commit-edit'] = (args, messageInfo) => {
+    commands['commit-edit'] = (args, message) => {
 
       // help arg clause
       if (args.trim().toLowerCase() == "help") {
@@ -142,7 +142,7 @@ module.exports = class Commitment_bot extends Bot {
       }
 
       let schedule_info = JSON.parse(args);
-      let cmt_info = messageInfo;
+      let cmt_info = message;
 
       let user = cmt_info['user'];
       let name = schedule_info['name'];
@@ -160,7 +160,7 @@ module.exports = class Commitment_bot extends Bot {
     }
 
     this.commands_help['commit-info'] = "gives info about an already existing commitment";
-    commands['commit-info'] = (args, messageInfo) => {
+    commands['commit-info'] = (args, message) => {
 
       // help arg clause
       if (args.trim().toLowerCase() == "help") {
@@ -168,7 +168,7 @@ module.exports = class Commitment_bot extends Bot {
         return null;
       }
 
-      let user = messageInfo['user'];
+      let user = message['user'];
       let name = args;
 
       // getting the cmt from this.commitments
@@ -228,18 +228,21 @@ module.exports = class Commitment_bot extends Bot {
     // 'etc''s added in for ease of commenting out lines
     let scheduleInfo_test = {
       "name": "test",
-      "cron": "* * * * * *",
+      "cron": "*/5 * * * * *",
       "etc": ""
     }
 
     let schedule_info = JSON.stringify(scheduleInfo_test);
-    let cmt_info = messageInfo_test
+    // cmt_info should be a message object, not a JSON
+    // let cmt_info = message_test;
 
-    this.channelID = messageInfo_test['channelID'];
+    this.channel = message_test.channel;
 
-    // let cmt = new Commitment(this, this.schedule, schedule_info, messageInfo_test);
+    // let cmt = new Commitment(this, this.schedule, schedule_info, message_test);
 
-    this.commands['CT'] = (args, messageInfo) => {
+    this.commands['CT'] = (args, message) => {
+
+      let cmt_info = message;
 
       let commands = [];
 
