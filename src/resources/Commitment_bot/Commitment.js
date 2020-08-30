@@ -22,7 +22,11 @@ module.exports = class Commitment extends ScheduledEvent{
 
     // encodes info about who/where the commitment is for
     this.channelID = cmt_info['channelID'];
-    this.user = cmt_info['user'];
+    this.user = cmt_info.evt.d.author;
+
+    // this.author = cmt_info['evt']['d']['author'];
+    this.author = this.user;
+    this.speaker.shout("author: "+this.speaker.tag(this.author));
   }
 
 
@@ -52,10 +56,12 @@ module.exports = class Commitment extends ScheduledEvent{
 
   // determines reaction based on whether commitment is fulfilled
   onSuccess() {
-    this.speaker.say("good job m8");
+    let message = "good job m8"
+    this.speaker.say(this.author + message);
   }
   onFailure() {
-    this.speaker.say("B A d DO THE THING");
+    let message = "B A d DO THE THING";
+    this.speaker.say(this.author + message);
   }
 
   // test method

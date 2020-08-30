@@ -60,7 +60,7 @@ module.exports = class ScheduledEvent {
     // cleaning up unit formatting
     unit = unit.toLowerCase();
     if (unit[unit.length - 1] == 's') {
-      unit = unit.substring(0, unit.length - 2);
+      unit = unit.substring(0, unit.length - 1);
     }
 
     this.speaker.shout("num: "+num+", unit: "+unit);

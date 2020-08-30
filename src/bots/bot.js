@@ -13,11 +13,6 @@ module.exports = class Bot {
 
     // creating a Speaker to handle output
     this.speaker = new Speaker(this.discordBot, this.logger);
-    // temporarily making speaker a global var
-    // var speaker = this.speaker;
-
-    // testing
-    this.logger.info("Bot initialized");
 
     // binds
     this.onBotLogin = this.onBotLogin.bind(this);
@@ -156,7 +151,11 @@ module.exports = class Bot {
 
     this.commands['test'] = (args, messageInfo) => {
 
-      this.speaker.shout("speaker -- shout")
+      // let contentJSON = messageInfo['evt'];
+      // let content = JSON.stringify(contentJSON, null, 2);
+      // this.speaker.shout(content);
+
+      this.speaker.shout("@"+messageInfo['userID']);
     }
   }
 

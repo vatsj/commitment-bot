@@ -8,7 +8,9 @@ To activate bot, execute the following command in terminal while in the main pro
 ## dependencies
 Requires node.js (https://nodejs.org/en/download/)
 
+Uses Discord.js API (https://github.com/discordjs/discord.js/blob/master/README.md)
+
 Additional dependencies (in `node_modules`) were installed via the following terminal commands:
-- `npm install discord.io winston –save`
+- `npm install discord.js winston –save`
 - `npm install https://github.com/woor/discord.io/tarball/gateway_v6`
 - `npm install node-schedule`

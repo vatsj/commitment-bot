@@ -28,4 +28,9 @@ module.exports = class Speaker {
     this.say(content);
   }
 
+  tag(user) {
+    let tag = "<" + user.username + "#" + user.discriminator + ">";
+    return tag;
+  }
+
 }
