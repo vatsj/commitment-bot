@@ -12,29 +12,38 @@ module.exports = class CommandHandler {
     this.commands = { };
 
     // adds general help command
-    this.addCommand_help();
+    this.addHelpCommand();
   }
 
-  addCommand(command) {
-    this.commands[command.keyword] = command;
+  addCommand(command_args) {
+
+    // unpack args JSON
+    let keyword = command_args.keyword;
+    let description = command_args.description;
+    let example = command_args.example;
+    let fn = command_args.fn;
+
+    let command = new Command(keyword, description, example, fn);
+
+    this.commands[keyword] = command;
   }
 
-  addCommand_help() {
+  addHelpCommand() {
 
     let help = new Command('help',
       'gives information about all commands',
       '!help',
-      () => {
+      (args, message) => {
         let content = "Here's a list of all keyword-command pairs:\n";
 
-        for (keyword in this.commands) {
+        for (let keyword in this.commands) {
           content += this.commands[keyword].help(false);
         }
 
         content += `\nto use a command, use the '!' character followed by the command keyword.
         \nfor more information on a specific command, add ' help' to the end of that command.`
 
-        this.speaker.say(content);
+        this.speaker.say(content, message.channel);
       });
 
       this.addCommand(help);

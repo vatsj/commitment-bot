@@ -2,9 +2,9 @@
 let rootDir = "./../..";
 let bot_resources = rootDir + "/src/resources/Bot";
 
-let Speaker = require(bot_resources + "/Speaker.js");
-let Command = require(bot_resources + "/Command.js");
-let CommandHandler = require(bot_resources + "/CommandHandler.js");
+var Speaker = require(bot_resources + "/Speaker.js");
+// var Command = require(bot_resources + "/Command.js");
+var CommandHandler = require(bot_resources + "/CommandHandler.js");
 
 module.exports = class Bot {
 
@@ -20,8 +20,11 @@ module.exports = class Bot {
     this.onBotLogin = this.onBotLogin.bind(this);
     this.respond = this.respond.bind(this);
 
+    // creates a json object to store commands
+    // commands: key (string) --> Command (Obj)
+    this.commandHandler = new CommandHandler(this);
     // initialize commands, for respond() function
-    this.commands = this.initCommands();
+    this.initCommands();
 
     // adds ability to run test command
     this.addTestCommand();
@@ -40,60 +43,42 @@ module.exports = class Bot {
   }
 
   initCommands() {
-    // creates a json object to store commands
-    // commands: key (string) --> Command (Obj)
-    this.CommandHandler = new CommandHandler(this);
 
     // outdated, to be phased out
-    let commands = {};
-    this.commands_help = { };
-    this.commands_example = { };
+    // let commands = {};
+    // this.commands_help = { };
+    // this.commands_example = { };
 
     // CONVERT ALL THESE TO COMMAND CLASS
-    this.CommandHandler.addCommand(new Command('ping',
-      'pongs',
-      '!ping',
-      (args, message) => {
-        this.speaker.say(':B:ong!');
-      }));
+    this.commandHandler.addCommand({
+      'keyword': 'ping',
+      'description': 'pongs',
+      'example': '!ping',
+      'fn': (args, message) => {
+        this.speaker.say(':B:ong!', message.channel);
+      }
+    });
 
-    // test command: 'ping' --> say('pong')
-    // this.commands_help['ping'] = "pongs";
-    // this.commands_example['ping'] = "!ping";
-    // commands['ping'] = (args, message) => {
-    //   this.speaker.say(':B:ong!');
-    // }
+    this.commandHandler.addCommand({
+      'keyword': 'info',
+      'description': 'gives info about the user/message',
+      'example': '!info',
+      'fn': (args, message) => {
+        let info = JSON.stringify(message, null, 2);
+        this.speaker.shout(info);
+      }
+    });
 
-    this.commands_help['info'] = "gives info about the user/message";
-    this.commands_example['info'] = "!info"
-    commands['info'] = (args, message) => {
-
-      let info = JSON.stringify(message, null, 2);
-      this.speaker.shout(info);
-    }
-
-    this.commands_help['identity'] = "gives the type of bot processing commands";
-    this.commands_example['identity'] = "!info"
-    commands['identity'] = (args, message) => {
-      this.speaker.say('I am the following class of bot:\t'+ this.identity());
-    }
-
-    this.commands_help['help'] = "gives information about all commands";
-    commands['help'] = (args, message) => {
-      let content = "Here's a list of all keyword-command pairs:\n";
-
-      content += JSON.stringify(this.commands_help, null, 2);
-
-      content += `\nto use a command, use the '!' character followed by the command keyword.
-      \nfor more information on a specific command, add ' help' to the end of that command.`
-      this.speaker.say(content);
-    }
-
-    // commands['error'] = (args, message) => {
-    //   this.speaker.say('error: command not found');
-    // }
-
-    return commands;
+    this.commandHandler.addCommand({
+      'keyword': 'identity',
+      'description': 'gives the type of bot processing commands',
+      'example': '!identity',
+      'fn': (args, message) => {
+        this.speaker.say('I am the following class of bot:\t'+ this.identity(), message.channel);
+      }
+    });
+    //
+    // return commands;
 
   }
 
@@ -132,62 +117,31 @@ module.exports = class Bot {
         // might mistakenly send messages to wrong channel
         this.speaker.setDefaultChannel(message.channel);
 
-        this.CommandHandler.execute_cmd(cmd, args, message)
-        //
-        // if (! (cmd in this.commands)) {
-        //   cmd = 'error'
-        // }
-        //
-        // let cmd_fn = this.commands[cmd];
-        // cmd_fn = cmd_fn.bind(this);
-        //
-        // // try/catch to handle command fn errors
-        // try {
-        //   if (! this.cmd_help(cmd, args)) {
-        //     cmd_fn(args, message);
-        //   }
-        // } catch (e) {
-        //   // console.error(e);
-        //   this.speaker.throwError(e);
-        //   this.speaker.say("error: command failed to execute");
-        // }
-
+        this.commandHandler.execute_cmd(cmd, args, message)
      }
   }
 
-  // if args == "help", gives help msg and returns true
-  // cmd_help(cmd, args) {
-  //
-  //   // if help cmd
-  //   if (args.trim().toLowerCase() == "help") {
-  //
-  //     let content = `**${cmd}**: ${this.commands_help[cmd]}
-  //     *Example Command:* ${this.commands_example[cmd]}`;
-  //
-  //     // return message
-  //     this.speaker.say(content);
-  //     return true;
-  //   }
-  //
-  //   return false;
-  // }
-
-  // used for testing
+  // // used for testing
   addTestCommand() {
 
-    this.commands['test'] = (args, message) => {
-
-      this.speaker.say("*this should be italicized*");
-    }
+    this.commandHandler.addCommand({
+      'keyword': 'test',
+      'description': 'test command (for development)',
+      'example': '!test',
+      'fn': (args, message) => {
+        // command code goes here
+        let x = 3;
+      }
+    });
   }
 
   // test method
   // runs a sequence of fns with a time interval between each
-  stutter_exec(commands, dt = 1000) {
+  stutter_exec(fns, dt = 1000) {
 
     let count = 0;
 
-    commands.forEach((fn) => {
+    fns.forEach((fn) => {
       count++;
 
       fn = fn.bind(this);

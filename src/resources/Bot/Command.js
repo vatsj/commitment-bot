@@ -13,10 +13,10 @@ module.exports = class Command {
   }
 
   help(example = true) {
-    let content = `**${cmd}**: ${this.commands_help[cmd]}`
+    let content = `**${this.keyword}**: ${this.description} \n`
 
     if (example) {
-      content += `*Example Command:* ${this.commands_example[cmd]}`;
+      content += `*Example Command:* \`${this.example}\` \n`;
     }
 
     // return help message
@@ -26,9 +26,9 @@ module.exports = class Command {
   // if args == "help", gives help msg and returns true
   help_check(args) {
 
-    // if help cmd, then
+    // if help is first arg, then
     if (args.trim().toLowerCase() == "help") {
-      return help(true);
+      return this.help(true);
     }
 
     return false;
