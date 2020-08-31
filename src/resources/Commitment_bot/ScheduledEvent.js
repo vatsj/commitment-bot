@@ -23,6 +23,7 @@ module.exports = class ScheduledEvent {
     this.schedule_info = schedule_info;
 
     this.name = schedule_info['name'];
+    this.description = schedule_info['description'];
 
     // handles time/cron conversion and scheduling
     // priority order: time, cron
@@ -92,7 +93,6 @@ module.exports = class ScheduledEvent {
 
       let currUnit = this.cron_elts[i];
 
-      this.speaker.log("unit: "+unit+", "+"currUnit: "+currUnit);
       if (unit == currUnit) {
         cron_elt = "*/" + num;
         timeSet = true;
@@ -106,7 +106,7 @@ module.exports = class ScheduledEvent {
       cron_JSON[currUnit] = cron_elt;
     }
 
-    this.speaker.shout(JSON.stringify(cron_JSON, null, 2));
+    // this.speaker.shout(JSON.stringify(cron_JSON, null, 2));
 
     if (! timeSet) {
       throw("error: time unit not recognized");
@@ -127,9 +127,7 @@ module.exports = class ScheduledEvent {
     cron_JSON['week'] + " " +
     cron_JSON['year'];
 
-    this.speaker.shout("cron: "+cron);
-
-
+    // this.speaker.shout("cron: "+cron);
     return cron;
   }
 
@@ -182,16 +180,11 @@ module.exports = class ScheduledEvent {
       'schedule': this.schedule,
       'etc': ''
     }
-    content += JSON.stringify(misc_info, null, 2);
 
     content += "\n" + JSON.stringify(this.schedule_info, null, 2);
+    content += JSON.stringify(misc_info, null, 2);
 
     return content;
-  }
-
-  // called by UI-side commitment rendering methods
-  getInfo_pretty() {
-    return this.name;
   }
 
 }

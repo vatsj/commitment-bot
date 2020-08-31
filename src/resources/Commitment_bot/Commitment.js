@@ -54,12 +54,14 @@ module.exports = class Commitment extends ScheduledEvent{
 
   // determines reaction based on whether commitment is fulfilled
   onSuccess() {
-    let message = "good job m8"
-    this.speaker.say(this.speaker.tag(this.author) + message);
+    let message = `${this.speaker.tag(this.author)} Nice job! You fulfilled the following commitment:
+    ${this.getInfo_pretty()}`
+    this.speaker.say(message);
   }
   onFailure() {
-    let message = "B A d DO THE THING";
-    this.speaker.say(this.speaker.tag(this.author) + message);
+    let message = `${this.speaker.tag(this.author)} Tsk tsk >:( you failed to fulfill the following commitment:
+    ${this.getInfo_pretty()}`
+    this.speaker.say(message);
   }
 
   // test method
@@ -80,13 +82,12 @@ module.exports = class Commitment extends ScheduledEvent{
     return content;
   }
 
-  // say(content) method, similar to Bot.js say()
-  // piggybacks off of Bot.say() using default channelID
-  // say(content) {
-  //   this.bot.say(content, this.channelID);
-  // }
-  // log(content) {
-  //   this.bot.log(content);
-  // }
+  // called by UI-side commitment rendering methods
+  getInfo_pretty() {
+    let content = `**${this.name}**
+    ${this.description}`;
+
+    return content;
+  }
 
 }

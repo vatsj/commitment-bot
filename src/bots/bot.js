@@ -1,8 +1,10 @@
 // imports class-specific resources
-var rootDir = "./../..";
-var bot_resources = rootDir + "/src/resources/Bot";
+let rootDir = "./../..";
+let bot_resources = rootDir + "/src/resources/Bot";
 
-var Speaker = require(bot_resources + "/Speaker.js");
+let Speaker = require(bot_resources + "/Speaker.js");
+let Command = require(bot_resources + "/Command.js");
+let CommandHandler = require(bot_resources + "/CommandHandler.js");
 
 module.exports = class Bot {
 
@@ -34,36 +36,44 @@ module.exports = class Bot {
     this.speaker.log('Logged in as: ');
 
     let user = this.client.user;
-    this.speaker.log(user.username + " (ID: "+user.ID+")");
-    // add actual login info!!!!
-    // this.logger.info(this.client.username + ' - (' + this.client.id + ')');
+    this.speaker.log(user.username + " (ID: "+user.id+")");
   }
 
   initCommands() {
     // creates a json object to store commands
-    let commands = { };
+    // commands: key (string) --> Command (Obj)
+    this.CommandHandler = new CommandHandler(this);
+
+    // outdated, to be phased out
+    let commands = {};
     this.commands_help = { };
+    this.commands_example = { };
+
+    // CONVERT ALL THESE TO COMMAND CLASS
+    this.CommandHandler.addCommand(new Command('ping',
+      'pongs',
+      '!ping',
+      (args, message) => {
+        this.speaker.say(':B:ong!');
+      }));
 
     // test command: 'ping' --> say('pong')
-    this.commands_help['ping'] = "pongs";
-    commands['ping'] = (args, message) => {
-      // help arg clause
-      if (args.trim().toLowerCase() == "help") {
-        this.speaker.say("c'mon...");
-        return null;
-      }
-
-      this.speaker.say(':B:ong!');
-    }
+    // this.commands_help['ping'] = "pongs";
+    // this.commands_example['ping'] = "!ping";
+    // commands['ping'] = (args, message) => {
+    //   this.speaker.say(':B:ong!');
+    // }
 
     this.commands_help['info'] = "gives info about the user/message";
+    this.commands_example['info'] = "!info"
     commands['info'] = (args, message) => {
 
       let info = JSON.stringify(message, null, 2);
       this.speaker.shout(info);
     }
 
-    this.commands_help['indentity'] = "gives the type of bot processing commands";
+    this.commands_help['identity'] = "gives the type of bot processing commands";
+    this.commands_example['identity'] = "!info"
     commands['identity'] = (args, message) => {
       this.speaker.say('I am the following class of bot:\t'+ this.identity());
     }
@@ -79,9 +89,9 @@ module.exports = class Bot {
       this.speaker.say(content);
     }
 
-    commands['error'] = (args, message) => {
-      this.speaker.say('error: command not found');
-    }
+    // commands['error'] = (args, message) => {
+    //   this.speaker.say('error: command not found');
+    // }
 
     return commands;
 
@@ -108,61 +118,66 @@ module.exports = class Bot {
     let content = message.content;
 
     if (content.substring(0, 1) == '!') {
-        // var messageInfo = {
-        //   'user': user,
-        //   'userID': userID,
-        //   'channelID': channelID,
-        //   'message': message,
-        //   'evt': evt
-        // };
-
-        // splits up args by spaces
-        // var args = message.substring(1).split(' ');
-        //
-        // var cmd = args[0];
-        // args = args.splice(1);
 
         // takes the entire non-cmd string as argt
         let split = content.indexOf(' ');
         if (split == -1) {
           split = content.length;
         }
-        var cmd = content.substring(1, split);
-        var args = content.substring(split + 1);
+        let cmd = content.substring(1, split);
+        let args = content.substring(split + 1);
         // this.log(cmd + " ~~ then ~~ " + args);
-
-        if (! (cmd in this.commands)) {
-          cmd = 'error'
-        }
 
         // hacky default for speaker.say
         // might mistakenly send messages to wrong channel
         this.speaker.setDefaultChannel(message.channel);
 
-        let cmd_fn = this.commands[cmd];
-        cmd_fn = cmd_fn.bind(this);
-
-        // try/catch to handle command fn errors
-        try {
-          cmd_fn(args, message);
-        } catch (e) {
-          console.error(e);
-          this.speaker.say("error: command failed to execute");
-        }
+        this.CommandHandler.execute_cmd(cmd, args, message)
+        //
+        // if (! (cmd in this.commands)) {
+        //   cmd = 'error'
+        // }
+        //
+        // let cmd_fn = this.commands[cmd];
+        // cmd_fn = cmd_fn.bind(this);
+        //
+        // // try/catch to handle command fn errors
+        // try {
+        //   if (! this.cmd_help(cmd, args)) {
+        //     cmd_fn(args, message);
+        //   }
+        // } catch (e) {
+        //   // console.error(e);
+        //   this.speaker.throwError(e);
+        //   this.speaker.say("error: command failed to execute");
+        // }
 
      }
   }
+
+  // if args == "help", gives help msg and returns true
+  // cmd_help(cmd, args) {
+  //
+  //   // if help cmd
+  //   if (args.trim().toLowerCase() == "help") {
+  //
+  //     let content = `**${cmd}**: ${this.commands_help[cmd]}
+  //     *Example Command:* ${this.commands_example[cmd]}`;
+  //
+  //     // return message
+  //     this.speaker.say(content);
+  //     return true;
+  //   }
+  //
+  //   return false;
+  // }
 
   // used for testing
   addTestCommand() {
 
     this.commands['test'] = (args, message) => {
 
-      // let contentJSON = messageInfo['evt'];
-      // let content = JSON.stringify(contentJSON, null, 2);
-      // this.speaker.shout(content);
-
-      // this.speaker.shout("@"+messageInfo['userID']);
+      this.speaker.say("*this should be italicized*");
     }
   }
 
@@ -183,22 +198,4 @@ module.exports = class Bot {
     })
   }
 
-  // speaker methods
-  // TO BE MOVED TO SPEAKER.JS
-  // say(content, channelID = this.channelID) {
-  //   this.client.sendMessage({
-  //       to: channelID,
-  //       message: content
-  //   });
-  // }
-  //
-  // log(content) {
-  //   this.logger.info(content);
-  // }
-  //
-  // // test method; logs and says content
-  // shout(content) {
-  //   this.log(content);
-  //   this.say(content);
-  // }
 }

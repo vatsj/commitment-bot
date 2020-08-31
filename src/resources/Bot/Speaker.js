@@ -12,17 +12,31 @@ module.exports = class Speaker {
 
   // speaker methods
   say(content, channel = this.channel_default) {
-    channel.send(content)
+    channel.send(content);
   }
 
   log(content) {
-    this.logger.info(content);
+    this.logger.log({
+      level: 'info',
+      message: content
+    });
   }
 
   // test method; logs and says content
   shout(content) {
     this.log(content);
     this.say(content);
+  }
+
+  throwError(e) {
+    let errorMsg = e.toString() + "\n\n" + e.stack;
+
+    // this.logger.log({
+    //   level: 'error',
+    //   message: errorMsg
+    // });
+
+    console.error(e);
   }
 
   // might be easy in Discord.js, which would render this fn unnecessary

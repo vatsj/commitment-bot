@@ -1,15 +1,15 @@
 // imports Bot.js class as a superclass
-var Bot = require("./Bot.js");
+let Bot = require("./Bot.js");
 
 // imports class-specific resources
-var rootDir = "./../..";
-var bot_resources = rootDir + "/src/resources/Commitment_bot";
+let rootDir = "./../..";
+let bot_resources = rootDir + "/src/resources/Commitment_bot";
 
 // importing resources
-var Commitment = require(bot_resources + "/Commitment.js");
+let Commitment = require(bot_resources + "/Commitment.js");
 
 // imports resources specific to testing env
-var message_test = require(rootDir + "/json/secure/message_test.json");
+let message_test = require(rootDir + "/json/secure/message_test.json");
 
 module.exports = class Commitment_bot extends Bot {
 
@@ -83,21 +83,36 @@ module.exports = class Commitment_bot extends Bot {
 
       // help arg clause
       if (args.trim().toLowerCase() == "help") {
-        this.speaker.say("c'mon...");
+        // return message
+        let content = `Create commitments that the bot will hold you to.
+        Use the following command to generate a commitment:\n`;
+
+        // adds in the example command
+        content += "!commit-create ";
+
+        let scheduleInfo_example = {
+          "name": "[COMMITMENT NAME]",
+          "description": "[BRIEF DESCRIPTION OF THE COMMITMENT]",
+          "time": "[TIME INTERVAL FOR COMPLETION]",
+          "etc": ""
+        };
+        content += JSON.stringify(scheduleInfo_example, null, 2);
+
+        this.speaker.say(content);
         return null;
       }
 
       // parsing JSON arg
       this.speaker.log(args);
       let schedule_info = JSON.parse(args);
-      let cmt_info = message;
+      let base_message = message;
 
-      let user = cmt_info['user'];
+      let user = base_message['user'];
       let name = schedule_info['name'];
       if (this.get_cmt(user, name)) {
         this.speaker.say("error: commitment already exists with the same name");
       } else{
-        let cmt = new Commitment(this, this.schedule, schedule_info, cmt_info);
+        let cmt = new Commitment(this, this.schedule, schedule_info, base_message);
         this.set_cmt(user, name, cmt);
 
         this.speaker.say("commitment successfully created");
@@ -142,9 +157,9 @@ module.exports = class Commitment_bot extends Bot {
       }
 
       let schedule_info = JSON.parse(args);
-      let cmt_info = message;
+      let base_message = message;
 
-      let user = cmt_info['user'];
+      let user = base_message['user'];
       let name = schedule_info['name'];
 
       let cmt = this.get_cmt(user, name);
@@ -168,7 +183,7 @@ module.exports = class Commitment_bot extends Bot {
         return null;
       }
 
-      let user = message['user'];
+      let user = message.user;
       let name = args;
 
       // getting the cmt from this.commitments
@@ -233,8 +248,8 @@ module.exports = class Commitment_bot extends Bot {
     }
 
     let schedule_info = JSON.stringify(scheduleInfo_test);
-    // cmt_info should be a message object, not a JSON
-    // let cmt_info = message_test;
+    // base_message should be a message object, not a JSON
+    // let base_message = message_test;
 
     this.channel = message_test.channel;
 
@@ -242,14 +257,14 @@ module.exports = class Commitment_bot extends Bot {
 
     this.commands['CT'] = (args, message) => {
 
-      let cmt_info = message;
+      let base_message = message;
 
       let commands = [];
 
-      commands.push(() => {this.commands['commit-create'](schedule_info, cmt_info)});
-      commands.push(() => {this.commands['commit-info']("test", cmt_info)});
-      commands.push(() => {this.commands['commit-edit'](schedule_info, cmt_info)});
-      commands.push(() => {this.commands['commit-delete']("test", cmt_info)});
+      commands.push(() => {this.commands['commit-create'](schedule_info, base_message)});
+      commands.push(() => {this.commands['commit-info']("test", base_message)});
+      commands.push(() => {this.commands['commit-edit'](schedule_info, base_message)});
+      commands.push(() => {this.commands['commit-delete']("test", base_message)});
 
       // this.speaker.log("commands: "+commands);
       this.stutter_exec(commands);
