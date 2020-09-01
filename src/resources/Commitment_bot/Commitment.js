@@ -1,22 +1,99 @@
-// imports ScheduledEvent.js class as a superclass
-var ScheduledEvent = require("./ScheduledEvent.js");
+// imports ScheduledEvent, CronEvent
+let cmt_resources = ".";
+var ScheduledEvent = require(cmt_resources + "/ScheduledEvent.js");
+var CronEvent = require(cmt_resources + "/CronEvent.js");
 
-module.exports = class Commitment extends ScheduledEvent{
+module.exports = class Commitment {
 
-  constructor(bot, schedule, schedule_info, base_message) {
-    // defines a ScheduledEvemt to evaluate the cmt
-    super(schedule, schedule_info, bot.speaker);
+  constructor(bot, args_info, base_message) {
 
     // info about bot, to return messages
     this.bot = bot;
     this.speaker = this.bot.speaker;
 
-    // this.extract_message_info(message_info);
-    this.extract_base_message(base_message);
+    this.extract_args_info(args_info);
+
+    // gets info specific to the commitment
+    this.extract_message_info(base_message);
 
   }
 
-  extract_base_message(base_message) {
+  // CronEvent class uses a shared schedule
+  static setSchedule(schedule) {
+    CronEvent.setSchedule(schedule);
+  }
+
+  // extracts info needed to schedule event
+  extract_args_info(args_info) {
+
+    this.args_info = args_info;
+
+    this.name = args_info['name'];
+    this.description = args_info['description'];
+    this.time = args_info['time'];
+
+    // binary var representing whether it
+    this.recurring = args_info['recurring'];
+
+    if (this.recurring) {
+      let cron = CronEvent.time2cron(this.time);
+      this.scheduledEvent = new CronEvent(() => {
+        this.checkFulfillment();
+      }, cron);
+    } else {
+      let milliseconds = OneOffEvent.time2ms(this.time);
+      this.scheduledEvent = new OneOffEvent(() => {
+        this.checkFulfillment();
+      }, milliseconds);
+    }
+
+  }
+
+  // extract_cron(args_info) {
+  //
+  //   // ASSUMING ONLY TIME IS INPUTTED
+  //   // handles time/cron conversion and scheduling
+  //   // priority order: time, cron
+  //   let crons = [];
+  //
+  //   if ("time" in this.args_info) {
+  //
+  //     this.time = this.args_info["time"];
+  //     crons.push(this.time2cron(this.time));
+  //
+  //     // deletes time from args_info
+  //     delete this.args_info["time"];
+  //   }
+  //
+  //   if ("cron" in this.args_info) {
+  //     crons.push(this.args_info["cron"]);
+  //   }
+  //
+  //   // sets cron to be first registered cron
+  //   // if no cron, throw error
+  //   if (crons.length == 0) {
+  //     throw("error: no time information given!")
+  //   }
+  //   this.cron = crons[0];
+  //   this.args_info['cron'] = this.cron;
+  // }
+
+  extract_edit(edit_info) {
+
+    let args_info = this.args_info;
+
+    // overwriting object info with edit info
+    for (let key in args_info) {
+      if (key in edit_info) {
+        args_info[key] = edit_info[key];
+      }
+    }
+
+    this.extract_args_info(args_info);
+    this.reschedule_event();
+  }
+
+  extract_message_info(base_message) {
 
     this.base_message = base_message
 
@@ -30,7 +107,7 @@ module.exports = class Commitment extends ScheduledEvent{
 
   // checks whether the commitment was fulfilled
   // triggered by ScheduledEvent call
-  event() {
+  checkFulfillment() {
 
     // logs that the fn is called
     // this.speaker.log("\nscheduled event: checking cmt fulfillment\n");
@@ -50,18 +127,34 @@ module.exports = class Commitment extends ScheduledEvent{
     this.fulfulled = false;
   }
 
-
-
   // determines reaction based on whether commitment is fulfilled
   onSuccess() {
     let message = `${this.speaker.tag(this.author)} Nice job! You fulfilled the following commitment:
     ${this.getInfo_pretty()}`
-    this.speaker.say(message);
+    this.speaker.say(message, this.channel);
   }
   onFailure() {
     let message = `${this.speaker.tag(this.author)} Tsk tsk >:( you failed to fulfill the following commitment:
     ${this.getInfo_pretty()}`
-    this.speaker.say(message);
+    this.speaker.say(message, this.channel);
+  }
+
+  // schedule_event(arg) {
+  //   // handled by subclasses
+  // }
+  //
+  // unschedule_event() {
+  //   // handled by subclasses
+  // }
+  //
+  // reschedule_event(arg) {
+  //   this.unschedule_event();
+  //   this.schedule_event(arg);
+  // }
+
+  delete() {
+    this.scheduledEvent.listener_off();
+    // call finalize (destructor) method?
   }
 
   // test method

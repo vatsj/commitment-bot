@@ -32,4 +32,4 @@ client.login(auth.token);
 // uses Bot class, to eventually be moved to Commitment-bot
 // let bot = new Bot(client, logger);
 let c_bot = new C_bot(client, logger);
-c_bot.addSchedule(schedule);
+c_bot.setSchedule(schedule);

@@ -43,13 +43,23 @@ module.exports = class Commitment_bot extends Bot {
     super.initCommands();
 
     // setting up an example commitment
-    let commit_example = {
+    let commit_genericExample = {
       "name": "[COMMITMENT NAME]",
       "description": "[BRIEF DESCRIPTION OF THE COMMITMENT]",
+      "recurring": "[`true` IF THE COMMITMENT IS RECURRING, `false` OTHERWISE]",
       "time": "[TIME INTERVAL FOR COMPLETION]",
       "etc": ""
     };
-    let commit_example_pretty = JSON.stringify(commit_example, null, 2);
+    let commit_genericExample_pretty = JSON.stringify(commit_genericExample, null, 2);
+
+    let commit_realExample = {
+      "name": "example",
+      "description": "an example of the commitment command syntax",
+      "recurring": "true",
+      "time": "2 days",
+      "etc": ""
+    };
+    let commit_realExample_pretty = JSON.stringify(commit_realExample, null, 2);
 
     this.commandHandler.addCommand({
       'keyword': 'commit-list',
@@ -60,7 +70,7 @@ module.exports = class Commitment_bot extends Bot {
         let content = "Here's a list of all commitments you have active:\n";
 
         // adds in each commitment
-        let user = message['user'];
+        let user = message.author;
         for (let key in this.commitments[user]) {
           content += this.commitments[user][key].getInfo_pretty();
         }
@@ -72,19 +82,19 @@ module.exports = class Commitment_bot extends Bot {
     this.commandHandler.addCommand({
       'keyword': 'commit-create',
       'description': 'creates a commitment',
-      'example': `!commit-create ${commit_example_pretty}`,
+      'example': `!commit-create ${commit_genericExample_pretty}`,
       'fn': (args, message) => {
         // parsing JSON arg
         this.speaker.log(args);
-        let schedule_info = JSON.parse(args);
+        let args_info = JSON.parse(args);
         let base_message = message;
 
-        let user = base_message['user'];
-        let name = schedule_info['name'];
+        let user = base_message.author;
+        let name = args_info['name'];
         if (this.get_cmt(user, name)) {
           this.speaker.say("error: commitment already exists with the same name");
         } else {
-          let cmt = new Commitment(this, this.schedule, schedule_info, base_message);
+          let cmt = new Commitment(this, args_info, base_message);
           this.set_cmt(user, name, cmt);
 
           this.speaker.say("commitment successfully created");
@@ -95,9 +105,9 @@ module.exports = class Commitment_bot extends Bot {
     this.commandHandler.addCommand({
       'keyword': 'commit-delete',
       'description': 'deletes an already existing commitment',
-      'example': `!commit-delete ${commit_example['name']}`,
+      'example': `!commit-delete ${commit_genericExample['name']}`,
       'fn': (args, message) => {
-        let user = message['user'];
+        let user = message.author;
         let name = args;
 
         // getting the cmt from this.commitments
@@ -121,18 +131,18 @@ module.exports = class Commitment_bot extends Bot {
     this.commandHandler.addCommand({
       'keyword': 'commit-edit',
       'description': 'edits an already existing commitment',
-      'example': `!commit-edit ${commit_example_pretty}`,
+      'example': `!commit-edit ${commit_genericExample_pretty}`,
       'fn': (args, message) => {
-        let schedule_info = JSON.parse(args);
+        let args_info = JSON.parse(args);
         let base_message = message;
 
         let user = base_message['user'];
-        let name = schedule_info['name'];
+        let name = args_info['name'];
 
         let cmt = this.get_cmt(user, name);
 
         if (cmt) {
-          cmt.extract_edit(schedule_info);
+          cmt.extract_edit(args_info);
 
           this.speaker.say("commitment successfully edited");
         } else {
@@ -144,9 +154,9 @@ module.exports = class Commitment_bot extends Bot {
     this.commandHandler.addCommand({
       'keyword': 'commit-info',
       'description': 'gives info about an already existing commitment',
-      'example': `!commit-info ${commit_example['name']}`,
+      'example': `!commit-info ${commit_genericExample['name']}`,
       'fn': (args, message) => {
-        let user = message.user;
+        let user = message.author;
         let name = args;
 
         // getting the cmt from this.commitments
@@ -163,9 +173,8 @@ module.exports = class Commitment_bot extends Bot {
     // return commands;
   }
 
-  addSchedule(schedule) {
-
-    this.schedule = schedule;
+  setSchedule(schedule) {
+    Commitment.setSchedule(schedule)
   }
 
   get_cmt(user, name) {
@@ -181,8 +190,7 @@ module.exports = class Commitment_bot extends Bot {
       }
     }
 
-    // otherwise, throw an error
-    this.speaker.log("cmt not found");
+    // otherwise, return null
     return null;
   }
 
@@ -205,19 +213,19 @@ module.exports = class Commitment_bot extends Bot {
   commitment_test() {
 
     // 'etc''s added in for ease of commenting out lines
-    let scheduleInfo_test = {
+    let argsInfo_test = {
       "name": "test",
       "cron": "*/5 * * * * *",
       "etc": ""
     }
 
-    let schedule_info = JSON.stringify(scheduleInfo_test);
+    let args_info = JSON.stringify(argsInfo_test);
     // base_message should be a message object, not a JSON
     // let base_message = message_test;
 
     this.channel = message_test.channel;
 
-    // let cmt = new Commitment(this, this.schedule, schedule_info, message_test);
+    // let cmt = new Commitment(this, args_info, message_test);
 
     this.commandHandler.addCommand({
       'keyword': 'CT',
@@ -227,10 +235,10 @@ module.exports = class Commitment_bot extends Bot {
         let base_message = message;
 
         let commands = [];
-  
-        commands.push(() => {this.commands['commit-create'](schedule_info, base_message)});
+
+        commands.push(() => {this.commands['commit-create'](args_info, base_message)});
         commands.push(() => {this.commands['commit-info']("test", base_message)});
-        commands.push(() => {this.commands['commit-edit'](schedule_info, base_message)});
+        commands.push(() => {this.commands['commit-edit'](args_info, base_message)});
         commands.push(() => {this.commands['commit-delete']("test", base_message)});
 
         // this.speaker.log("commands: "+commands);
