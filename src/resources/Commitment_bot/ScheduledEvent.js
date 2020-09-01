@@ -32,11 +32,11 @@ module.exports = class ScheduledEvent extends EventEmitter {
   //   this.schedule_event(arg);
   // }
 
-  delete() {
-    // should this be here or in both subclasses?
-    this.listener_off();
-    // call finalize (destructor) method?
-  }
+  // delete() {
+  //   // should this be here or in both subclasses?
+  //   this.listener_off();
+  //   // call finalize (destructor) method?
+  // }
 
   // test method
   getInfo() {

@@ -19,10 +19,9 @@ module.exports = class CronEvent extends ScheduledEvent {
   // }
 
   schedule_event(cron) {
-    let job = CronEvent.schedule.scheduleJob(cron, () => {
+    this.job = CronEvent.schedule.scheduleJob(cron, () => {
       this.emit('scheduled_evt');
     });
-    return job
   }
 
   unschedule_event(job = this.job) {

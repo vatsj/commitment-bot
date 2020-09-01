@@ -12,6 +12,7 @@ module.exports = class Commitment {
     this.speaker = this.bot.speaker;
 
     this.extract_args_info(args_info);
+    this.scheduledEvent = this.create_event();
 
     // gets info specific to the commitment
     this.extract_message_info(base_message);
@@ -34,19 +35,25 @@ module.exports = class Commitment {
 
     // binary var representing whether it
     this.recurring = args_info['recurring'];
+  }
+
+  create_event(time = this.time) {
+
+    let scheduledEvent;
 
     if (this.recurring) {
       let cron = CronEvent.time2cron(this.time);
-      this.scheduledEvent = new CronEvent(() => {
+      scheduledEvent = new CronEvent(() => {
         this.checkFulfillment();
       }, cron);
     } else {
       let milliseconds = OneOffEvent.time2ms(this.time);
-      this.scheduledEvent = new OneOffEvent(() => {
+      scheduledEvent = new OneOffEvent(() => {
         this.checkFulfillment();
       }, milliseconds);
     }
 
+    return scheduledEvent;
   }
 
   // extract_cron(args_info) {
@@ -90,7 +97,16 @@ module.exports = class Commitment {
     }
 
     this.extract_args_info(args_info);
-    this.reschedule_event();
+
+    // reschedule event
+    if (this.recurring) {
+      let cron = CronEvent.time2cron(this.time);
+      this.scheduledEvent.reschedule_event(cron);
+    } else {
+      let milliseconds = OneOffEvent.time2ms(this.time);
+      this.scheduledEvent.reschedule_event(milliseconds);
+    }
+    // this.scheduledEvent.reschedule_event();
   }
 
   extract_message_info(base_message) {
@@ -160,17 +176,9 @@ module.exports = class Commitment {
   // test method
   getInfo() {
 
-    let content = super.getInfo();
-
-    // let misc_info = {
-    //   'bot': this.bot,
-    //   // 'user': this.user,
-    //   // 'channelID': this.channelID,
-    //   'etc': ''
-    // }
-    // content += JSON.stringify(misc_info, null, 2);
-
-    content += "\n\n" + JSON.stringify(this.base_message, null, 2);
+    let content = "";
+    content += JSON.stringify(this.scheduledEvent, null, 2);
+    content += this.base_message.toString();
 
     return content;
   }

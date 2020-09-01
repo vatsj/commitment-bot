@@ -50,6 +50,7 @@ module.exports = class Commitment_bot extends Bot {
       "time": "[TIME INTERVAL FOR COMPLETION]",
       "etc": ""
     };
+    this.commit_genericExample = commit_genericExample;
     let commit_genericExample_pretty = JSON.stringify(commit_genericExample, null, 2);
 
     let commit_realExample = {
@@ -59,6 +60,7 @@ module.exports = class Commitment_bot extends Bot {
       "time": "2 days",
       "etc": ""
     };
+    this.commit_realExample = commit_realExample;
     let commit_realExample_pretty = JSON.stringify(commit_realExample, null, 2);
 
     this.commandHandler.addCommand({
@@ -85,7 +87,7 @@ module.exports = class Commitment_bot extends Bot {
       'example': `!commit-create ${commit_genericExample_pretty}`,
       'fn': (args, message) => {
         // parsing JSON arg
-        this.speaker.log(args);
+        // this.speaker.log(args);
         let args_info = JSON.parse(args);
         let base_message = message;
 
@@ -136,7 +138,7 @@ module.exports = class Commitment_bot extends Bot {
         let args_info = JSON.parse(args);
         let base_message = message;
 
-        let user = base_message['user'];
+        let user = base_message.author;
         let name = args_info['name'];
 
         let cmt = this.get_cmt(user, name);
@@ -213,11 +215,7 @@ module.exports = class Commitment_bot extends Bot {
   commitment_test() {
 
     // 'etc''s added in for ease of commenting out lines
-    let argsInfo_test = {
-      "name": "test",
-      "cron": "*/5 * * * * *",
-      "etc": ""
-    }
+    let argsInfo_test = this.commit_realExample;
 
     let args_info = JSON.stringify(argsInfo_test);
     // base_message should be a message object, not a JSON
@@ -234,15 +232,15 @@ module.exports = class Commitment_bot extends Bot {
       'fn': (args, message) => {
         let base_message = message;
 
-        let commands = [];
+        let fns = [];
 
-        commands.push(() => {this.commands['commit-create'](args_info, base_message)});
-        commands.push(() => {this.commands['commit-info']("test", base_message)});
-        commands.push(() => {this.commands['commit-edit'](args_info, base_message)});
-        commands.push(() => {this.commands['commit-delete']("test", base_message)});
+        fns.push(() => {this.commandHandler.execute_cmd('commit-create', args_info, base_message)});
+        fns.push(() => {this.commandHandler.execute_cmd('commit-info', argsInfo_test['name'], base_message)});
+        fns.push(() => {this.commandHandler.execute_cmd('commit-edit', args_info, base_message)});
+        fns.push(() => {this.commandHandler.execute_cmd('commit-delete', argsInfo_test['name'], base_message)});
 
         // this.speaker.log("commands: "+commands);
-        this.stutter_exec(commands);
+        this.stutter_exec(fns);
       }
     });
   }
