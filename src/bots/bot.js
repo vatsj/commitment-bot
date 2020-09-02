@@ -53,7 +53,7 @@ module.exports = class Bot {
     this.commandHandler.addCommand({
       'keyword': 'ping',
       'description': 'pongs',
-      'example': '!ping',
+      'examples': '!ping',
       'fn': (args, message) => {
         this.speaker.say(':B:ong!', message.channel);
       }
@@ -62,7 +62,7 @@ module.exports = class Bot {
     this.commandHandler.addCommand({
       'keyword': 'info',
       'description': 'gives info about the user/message',
-      'example': '!info',
+      'examples': '!info',
       'fn': (args, message) => {
         let info = JSON.stringify(message, null, 2);
         this.speaker.shout(info);
@@ -72,7 +72,7 @@ module.exports = class Bot {
     this.commandHandler.addCommand({
       'keyword': 'identity',
       'description': 'gives the type of bot processing commands',
-      'example': '!identity',
+      'examples': '!identity',
       'fn': (args, message) => {
         this.speaker.say('I am the following class of bot:\t'+ this.identity(), message.channel);
       }
@@ -127,7 +127,7 @@ module.exports = class Bot {
     this.commandHandler.addCommand({
       'keyword': 'test',
       'description': 'test command (for development)',
-      'example': '!test',
+      'examples': '!test',
       'fn': (args, message) => {
         // command code goes here
         let x = 3;

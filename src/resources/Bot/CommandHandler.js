@@ -20,10 +20,10 @@ module.exports = class CommandHandler {
     // unpack args JSON
     let keyword = command_args.keyword;
     let description = command_args.description;
-    let example = command_args.example;
+    let examples = command_args.examples;
     let fn = command_args.fn;
 
-    let command = new Command(keyword, description, example, fn);
+    let command = new Command(keyword, description, examples, fn);
 
     this.commands[keyword] = command;
   }

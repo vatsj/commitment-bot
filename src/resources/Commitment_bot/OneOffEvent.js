@@ -18,6 +18,9 @@ module.exports = class OneOffEvent extends ScheduledEvent {
     let job = setTimeout(() => {
       if (! status.cancelled) {
         this.emit('scheduled_evt');
+
+        // deletes event after firing once
+        this.emit('delete');
       }
     }, milliseconds);
     return job
@@ -53,7 +56,7 @@ module.exports = class OneOffEvent extends ScheduledEvent {
       "day": 24,
       "hour": 60,
       "minute": 60,
-      "second", 1000
+      "second": 1000
     };
 
     if (! unit in TIME_MULTIPLIERS) {

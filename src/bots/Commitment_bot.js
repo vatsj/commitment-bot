@@ -38,6 +38,39 @@ module.exports = class Commitment_bot extends Bot {
     return "Commitment_bot (can record and track commitments)";
   }
 
+  // returns true iff the command succeeds
+  createCommitment(args_info, base_message) {
+    let user = base_message.author;
+    let name = args_info['name'];
+
+    if (this.get_cmt(user, name)) {
+      this.speaker.say("error: commitment already exists with the same name");
+    } else {
+      let cmt = new Commitment(this, args_info, base_message);
+      this.set_cmt(user, name, cmt);
+
+      this.speaker.say("commitment successfully created");
+    }
+  }
+
+  deleteCommitment(name, base_message) {
+    let user = base_message.author;
+
+    // getting the cmt from this.commitments
+    let cmt = this.get_cmt(user, name);
+    // let cmt = this.commitments[name];
+
+    // substitute with more general delete() fn?
+    if (cmt) {
+      cmt.delete();
+      this.set_cmt(user, name, null);
+
+      this.speaker.say("commitment successfully deleted");
+    } else {
+      this.speaker.say("error: commitment name not found!");
+    }
+  }
+
   initCommands() {
 
     super.initCommands();
@@ -66,7 +99,7 @@ module.exports = class Commitment_bot extends Bot {
     this.commandHandler.addCommand({
       'keyword': 'commit-list',
       'description': 'lists all commitments you\'ve set',
-      'example': '!commit-list',
+      'examples': '!commit-list',
       'fn': (args, message) => {
         // return message
         let content = "Here's a list of all commitments you have active:\n";
@@ -84,30 +117,40 @@ module.exports = class Commitment_bot extends Bot {
     this.commandHandler.addCommand({
       'keyword': 'commit-create',
       'description': 'creates a commitment',
-      'example': `!commit-create ${commit_genericExample_pretty}`,
+      'examples': [
+        `!commit-create ${commit_genericExample_pretty}`,
+        `!commit-create ${commit_realExample_pretty}`
+      ],
       'fn': (args, message) => {
         // parsing JSON arg
         // this.speaker.log(args);
         let args_info = JSON.parse(args);
         let base_message = message;
 
-        let user = base_message.author;
-        let name = args_info['name'];
-        if (this.get_cmt(user, name)) {
-          this.speaker.say("error: commitment already exists with the same name");
-        } else {
-          let cmt = new Commitment(this, args_info, base_message);
-          this.set_cmt(user, name, cmt);
-
-          this.speaker.say("commitment successfully created");
-        }
+        this.createCommitment(args_info, base_message);
       }
     });
 
     this.commandHandler.addCommand({
       'keyword': 'commit-delete',
       'description': 'deletes an already existing commitment',
-      'example': `!commit-delete ${commit_genericExample['name']}`,
+      'examples': [
+        `!commit-delete ${commit_genericExample['name']}`,
+        `!commit-delete ${commit_realExample['name']}`
+      ],
+      'fn': (args, message) => {
+        let name = args;
+        this.deleteCommitment(name, message);
+      }
+    });
+
+    this.commandHandler.addCommand({
+      'keyword': 'commit-fulfill',
+      'description': 'fulfills the inputted commitment',
+      'examples': [
+        `!commit-fulfill ${commit_genericExample['name']}`,
+        `!commit-fulfill ${commit_realExample['name']}`
+      ],
       'fn': (args, message) => {
         let user = message.author;
         let name = args;
@@ -118,22 +161,21 @@ module.exports = class Commitment_bot extends Bot {
 
         // substitute with more general delete() fn?
         if (cmt) {
-          cmt.delete();
-          this.set_cmt(user, name, null);
-
-          this.speaker.say("commitment successfully deleted");
+          // will display its own message, don't need a confirmation
+          cmt.fulfill();
         } else {
           this.speaker.say("error: commitment name not found!");
         }
       }
     });
 
-
-
     this.commandHandler.addCommand({
       'keyword': 'commit-edit',
       'description': 'edits an already existing commitment',
-      'example': `!commit-edit ${commit_genericExample_pretty}`,
+      'examples': [
+        `!commit-edit ${commit_genericExample_pretty}`,
+        `!commit-edit ${commit_realExample_pretty}`
+      ],
       'fn': (args, message) => {
         let args_info = JSON.parse(args);
         let base_message = message;
@@ -156,7 +198,10 @@ module.exports = class Commitment_bot extends Bot {
     this.commandHandler.addCommand({
       'keyword': 'commit-info',
       'description': 'gives info about an already existing commitment',
-      'example': `!commit-info ${commit_genericExample['name']}`,
+      'examples': [
+        `!commit-info ${commit_genericExample['name']}`,
+        `!commit-info ${commit_realExample['name']}`
+      ],
       'fn': (args, message) => {
         let user = message.author;
         let name = args;
@@ -228,15 +273,17 @@ module.exports = class Commitment_bot extends Bot {
     this.commandHandler.addCommand({
       'keyword': 'CT',
       'description': 'auto-tests all the commit-[] commands',
-      'example': '!CT',
+      'examples': '!CT',
       'fn': (args, message) => {
         let base_message = message;
 
         let fns = [];
 
         fns.push(() => {this.commandHandler.execute_cmd('commit-create', args_info, base_message)});
+        fns.push(() => {this.commandHandler.execute_cmd('commit-list', "", base_message)});
         fns.push(() => {this.commandHandler.execute_cmd('commit-info', argsInfo_test['name'], base_message)});
         fns.push(() => {this.commandHandler.execute_cmd('commit-edit', args_info, base_message)});
+        fns.push(() => {this.commandHandler.execute_cmd('commit-fulfill', argsInfo_test['name'], base_message)});
         fns.push(() => {this.commandHandler.execute_cmd('commit-delete', argsInfo_test['name'], base_message)});
 
         // this.speaker.log("commands: "+commands);

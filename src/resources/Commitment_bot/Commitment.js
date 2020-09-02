@@ -1,6 +1,6 @@
 // imports ScheduledEvent, CronEvent
 let cmt_resources = ".";
-var ScheduledEvent = require(cmt_resources + "/ScheduledEvent.js");
+var OneOffEvent = require(cmt_resources + "/OneOffEvent.js");
 var CronEvent = require(cmt_resources + "/CronEvent.js");
 
 module.exports = class Commitment {
@@ -16,6 +16,9 @@ module.exports = class Commitment {
 
     // gets info specific to the commitment
     this.extract_message_info(base_message);
+
+    // defaults to not fulfilled
+    this.fulfilled = false
 
   }
 
@@ -33,8 +36,9 @@ module.exports = class Commitment {
     this.description = args_info['description'];
     this.time = args_info['time'];
 
-    // binary var representing whether it
-    this.recurring = args_info['recurring'];
+    // binary var representing whether the event is recurring
+    // maunally mapped from string --> boolean
+    this.recurring = (args_info['recurring'].toLowerCase() == 'true');
   }
 
   create_event(time = this.time) {
@@ -52,6 +56,12 @@ module.exports = class Commitment {
         this.checkFulfillment();
       }, milliseconds);
     }
+
+    // adds a delete event (for OneOffEvents)
+    scheduledEvent.addListener('delete', () => {
+      // deletes the commitment and removes it from C_bot dictionary
+      this.bot.deleteCommitment(this.name, this.base_message);
+    })
 
     return scheduledEvent;
   }
@@ -89,6 +99,9 @@ module.exports = class Commitment {
 
     let args_info = this.args_info;
 
+    // checks if recurring status changed
+    let recurring_changeFlag = (args_info['time'] != edit_info['time']);
+
     // overwriting object info with edit info
     for (let key in args_info) {
       if (key in edit_info) {
@@ -98,15 +111,19 @@ module.exports = class Commitment {
 
     this.extract_args_info(args_info);
 
-    // reschedule event
-    if (this.recurring) {
-      let cron = CronEvent.time2cron(this.time);
-      this.scheduledEvent.reschedule_event(cron);
+    if (recurring_changeFlag) {
+      this.scheduledEvent.listener_off();
+      this.scheduledEvent = this.create_event(this.time);
     } else {
-      let milliseconds = OneOffEvent.time2ms(this.time);
-      this.scheduledEvent.reschedule_event(milliseconds);
+      // reschedule event
+      if (this.recurring) {
+        let cron = CronEvent.time2cron(this.time);
+        this.scheduledEvent.reschedule_event(cron);
+      } else {
+        let milliseconds = OneOffEvent.time2ms(this.time);
+        this.scheduledEvent.reschedule_event(milliseconds);
+      }
     }
-    // this.scheduledEvent.reschedule_event();
   }
 
   extract_message_info(base_message) {
@@ -120,6 +137,11 @@ module.exports = class Commitment {
     // this.speaker.shout("author: "+this.speaker.tag(this.author));
   }
 
+  // fulfills the commitment
+  fulfill() {
+    this.fulfilled = true;
+    this.onSuccess();
+  }
 
   // checks whether the commitment was fulfilled
   // triggered by ScheduledEvent call
@@ -140,7 +162,7 @@ module.exports = class Commitment {
   reset_cmt() {
 
     // resets commitment fulfillment status
-    this.fulfulled = false;
+    this.fulfilled = false;
   }
 
   // determines reaction based on whether commitment is fulfilled
@@ -178,7 +200,7 @@ module.exports = class Commitment {
 
     let content = "";
     content += JSON.stringify(this.scheduledEvent, null, 2);
-    content += this.base_message.toString();
+    content += this.base_message;
 
     return content;
   }
@@ -186,7 +208,9 @@ module.exports = class Commitment {
   // called by UI-side commitment rendering methods
   getInfo_pretty() {
     let content = `**${this.name}**
-    ${this.description}`;
+    ${this.description}
+    recurring: ${this.recurring}
+    time interval: ${this.time} \n`;
 
     return content;
   }
