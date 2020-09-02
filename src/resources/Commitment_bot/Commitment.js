@@ -33,12 +33,18 @@ module.exports = class Commitment {
     this.args_info = args_info;
 
     this.name = args_info['name'];
-    this.description = args_info['description'];
+    this.description = args_info['description'] ? args_info['description'] : "";
     this.time = args_info['time'];
 
     // binary var representing whether the event is recurring
     // maunally mapped from string --> boolean
-    this.recurring = (args_info['recurring'].toLowerCase() == 'true');
+    this.recurring = args_info['recurring'] ? (args_info['recurring'].toLowerCase() == 'true') : false;
+
+    // checks for essential arguments
+    if (! (this.name && this.time)) {
+      this.speaker.say("commitment 'name' and 'time' arguments are required!");
+      throw "commitment - missing name/time argument";
+    }
   }
 
   create_event(time = this.time) {
@@ -66,34 +72,35 @@ module.exports = class Commitment {
     return scheduledEvent;
   }
 
-  // extract_cron(args_info) {
-  //
-  //   // ASSUMING ONLY TIME IS INPUTTED
-  //   // handles time/cron conversion and scheduling
-  //   // priority order: time, cron
-  //   let crons = [];
-  //
-  //   if ("time" in this.args_info) {
-  //
-  //     this.time = this.args_info["time"];
-  //     crons.push(this.time2cron(this.time));
-  //
-  //     // deletes time from args_info
-  //     delete this.args_info["time"];
-  //   }
-  //
-  //   if ("cron" in this.args_info) {
-  //     crons.push(this.args_info["cron"]);
-  //   }
-  //
-  //   // sets cron to be first registered cron
-  //   // if no cron, throw error
-  //   if (crons.length == 0) {
-  //     throw("error: no time information given!")
-  //   }
-  //   this.cron = crons[0];
-  //   this.args_info['cron'] = this.cron;
-  // }
+  // UNUSED FN
+  // needed to convert different types of time args
+  extract_cron(args_info) {
+
+    // handles time/cron conversion and scheduling
+    // priority order: time, cron
+    let crons = [];
+
+    if ("time" in this.args_info) {
+
+      this.time = this.args_info["time"];
+      crons.push(this.time2cron(this.time));
+
+      // deletes time from args_info
+      delete this.args_info["time"];
+    }
+
+    if ("cron" in this.args_info) {
+      crons.push(this.args_info["cron"]);
+    }
+
+    // sets cron to be first registered cron
+    // if no cron, throw error
+    if (crons.length == 0) {
+      throw "error: no time information given!"
+    }
+    this.cron = crons[0];
+    this.args_info['cron'] = this.cron;
+  }
 
   extract_edit(edit_info) {
 

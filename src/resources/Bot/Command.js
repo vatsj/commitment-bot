@@ -1,13 +1,13 @@
 // stores commands, referenced by keywords in the bot
 module.exports = class Command {
 
-  constructor(keyword, description, examples, fn) {
+  constructor(keyword, description, syntax, examples, fn) {
 
     this.keyword = keyword;
     this.description = description;
 
-    // this.examples = [];
-    // this.examples.push(examples);
+    // might be undefined, needs a check later
+    this.syntax = syntax
 
     // handles multiple examples
     if (Array.isArray(examples)) {
@@ -27,7 +27,12 @@ module.exports = class Command {
     let content = `**${this.keyword}**: ${this.description} \n`
 
     if (examples) {
-      content += "Example commands: \n";
+      // adds syntax clause, if it exists
+      if (this.syntax) {
+        content += `*Syntax:* ${this.syntax} \n`;
+      }
+
+      content += "*Example commands:* \n";
       for (let i = 0; i < this.examples.length; i++) {
         let example = this.examples[i];
         content += `\`${example}\` \n`;

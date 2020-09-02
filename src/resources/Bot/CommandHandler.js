@@ -20,20 +20,31 @@ module.exports = class CommandHandler {
     // unpack args JSON
     let keyword = command_args.keyword;
     let description = command_args.description;
+
+    // checks if syntax arg was passed
+    let syntax = command_args.syntax;
+    if (! syntax) {
+      syntax = null;
+    }
+
     let examples = command_args.examples;
     let fn = command_args.fn;
 
-    let command = new Command(keyword, description, examples, fn);
+    // this.speaker.shout("fn: "+fn);
+
+    let command = new Command(keyword, description, syntax, examples, fn);
 
     this.commands[keyword] = command;
   }
 
+  // adds help command to handler
   addHelpCommand() {
 
-    let help = new Command('help',
-      'gives information about all commands',
-      '!help',
-      (args, message) => {
+    this.addCommand({
+      'keyword': 'help',
+      'description': 'gives information about all commands',
+      'examples': '!help',
+      'fn': (args, message) => {
         let content = "Here's a list of all keyword-command pairs:\n";
 
         for (let keyword in this.commands) {
@@ -44,9 +55,8 @@ module.exports = class CommandHandler {
         \nfor more information on a specific command, add ' help' to the end of that command.`
 
         this.speaker.say(content, message.channel);
-      });
-
-      this.addCommand(help);
+      }
+    });
   }
 
   // tries to run command given by the keywords

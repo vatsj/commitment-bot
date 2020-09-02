@@ -2,19 +2,16 @@
 let rootDir = "./../..";
 let bot_resources = rootDir + "/src/resources/Bot";
 
-var Speaker = require(bot_resources + "/Speaker.js");
+// var Speaker = require(bot_resources + "/Speaker.js");
 // var Command = require(bot_resources + "/Command.js");
 var CommandHandler = require(bot_resources + "/CommandHandler.js");
 
 module.exports = class Bot {
 
-  constructor(client, logger) {
+  constructor(client, speaker) {
 
     this.client = client;
-    this.logger = logger;
-
-    // creating a Speaker to handle output
-    this.speaker = new Speaker(this.client, this.logger);
+    this.speaker = speaker;
 
     // binds
     this.onBotLogin = this.onBotLogin.bind(this);
@@ -27,7 +24,7 @@ module.exports = class Bot {
     this.initCommands();
 
     // adds ability to run test command
-    this.addTestCommand();
+    this.addTestCommands();
 
     this.client.on('ready', this.onBotLogin);
     this.client.on('message', this.respond);
@@ -88,16 +85,6 @@ module.exports = class Bot {
     return "Bot (the default class of bot)";
   }
 
-  // test method for respond functionality
-  testRespond(message) {
-    let content = message.content;
-
-    // default response, for testing
-    if (content.substring(0, 1) == '!') {
-      this.speaker.say(message.channel, "beep!");
-    }
-  }
-
   respond(message) {
 
     let content = message.content;
@@ -122,7 +109,7 @@ module.exports = class Bot {
   }
 
   // // used for testing
-  addTestCommand() {
+  addTestCommands() {
 
     this.commandHandler.addCommand({
       'keyword': 'test',

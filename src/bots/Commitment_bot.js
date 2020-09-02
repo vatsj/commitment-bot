@@ -13,23 +13,15 @@ let message_test = require(rootDir + "/json/secure/message_test.json");
 
 module.exports = class Commitment_bot extends Bot {
 
-  // TODO: add test commitment handler
-  // TODO: add scheduler
-
-  constructor(client, logger) {
+  constructor(client, speaker) {
 
     // superclass (Bot.js) constructor
-    super(client, logger);
+    super(client, speaker);
 
     // TODO: add stuff for commitments/scheduling?
     // JSON storing commitments
     // stored in form {person: {name: [Commitment]}}
     this.commitments = {};
-
-    // TESTING: running test fn after 1 second
-    setTimeout(() => {
-      this.commitment_test();
-    }, 1000);
   }
 
   // returns identity of Bot
@@ -64,10 +56,9 @@ module.exports = class Commitment_bot extends Bot {
     if (cmt) {
       cmt.delete();
       this.set_cmt(user, name, null);
-
-      this.speaker.say("commitment successfully deleted");
+      return true;
     } else {
-      this.speaker.say("error: commitment name not found!");
+      return false;
     }
   }
 
@@ -90,11 +81,29 @@ module.exports = class Commitment_bot extends Bot {
       "name": "example",
       "description": "an example of the commitment command syntax",
       "recurring": "true",
-      "time": "2 days",
+      "time": "1 day",
       "etc": ""
     };
     this.commit_realExample = commit_realExample;
     let commit_realExample_pretty = JSON.stringify(commit_realExample, null, 2);
+
+    // gives the commit-edit command to change certain arguments
+    let commit2edit = (args_info, newTime) => {
+      let edit_info  = { };
+
+      // same name, manually edit time
+      edit_info['name'] = args_info['name'];
+      edit_info['time'] = newTime;
+
+      return edit_info;
+    }
+
+    // creating commit-edit examples from the commit-create ones
+    let edit_genericExample = commit2edit(commit_genericExample, '[A NEW TIME INTERVAL]');
+    let edit_genericExample_pretty = JSON.stringify(edit_genericExample, null, 2);
+
+    let edit_realExample = commit2edit(commit_genericExample, '2 weeks');
+    let edit_realExample_pretty = JSON.stringify(edit_realExample, null, 2);
 
     this.commandHandler.addCommand({
       'keyword': 'commit-list',
@@ -140,7 +149,13 @@ module.exports = class Commitment_bot extends Bot {
       ],
       'fn': (args, message) => {
         let name = args;
-        this.deleteCommitment(name, message);
+
+        // tries to delete command, announces results
+        if (this.deleteCommitment(name, message)) {
+          this.speaker.say("commitment successfully deleted");
+        } else {
+          this.speaker.say("error: commitment name not found!");
+        }
       }
     });
 
@@ -171,10 +186,13 @@ module.exports = class Commitment_bot extends Bot {
 
     this.commandHandler.addCommand({
       'keyword': 'commit-edit',
-      'description': 'edits an already existing commitment',
+      'description': `edits an already existing commitment`,
+      'syntax': 'the "name" entry defines the commitment to edit, the other '+
+      'entries overwrite their original values. For example, the commands below '+
+      'change the time interval for the commitment.',
       'examples': [
-        `!commit-edit ${commit_genericExample_pretty}`,
-        `!commit-edit ${commit_realExample_pretty}`
+        `!commit-edit ${edit_genericExample_pretty}`,
+        `!commit-edit ${edit_realExample_pretty}`
       ],
       'fn': (args, message) => {
         let args_info = JSON.parse(args);
@@ -257,7 +275,9 @@ module.exports = class Commitment_bot extends Bot {
 
   }
 
-  commitment_test() {
+  addTestCommands() {
+
+    super.addTestCommands();
 
     // 'etc''s added in for ease of commenting out lines
     let argsInfo_test = this.commit_realExample;
@@ -285,6 +305,9 @@ module.exports = class Commitment_bot extends Bot {
         fns.push(() => {this.commandHandler.execute_cmd('commit-edit', args_info, base_message)});
         fns.push(() => {this.commandHandler.execute_cmd('commit-fulfill', argsInfo_test['name'], base_message)});
         fns.push(() => {this.commandHandler.execute_cmd('commit-delete', argsInfo_test['name'], base_message)});
+
+        // checking that commitment gets deleted
+        fns.push(() => {this.commandHandler.execute_cmd('commit-list', "", base_message)});
 
         // this.speaker.log("commands: "+commands);
         this.stutter_exec(fns);
