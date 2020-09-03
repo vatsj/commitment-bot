@@ -71,8 +71,7 @@ module.exports = class Commitment_bot extends Bot {
       "name": "[COMMITMENT NAME]",
       "description": "[BRIEF DESCRIPTION OF THE COMMITMENT]",
       "recurring": "[`true` IF THE COMMITMENT IS RECURRING, `false` OTHERWISE]",
-      "time": "[TIME INTERVAL FOR COMPLETION]",
-      "etc": ""
+      "time": "[TIME INTERVAL FOR COMPLETION]"
     };
     this.commit_genericExample = commit_genericExample;
     let commit_genericExample_pretty = JSON.stringify(commit_genericExample, null, 2);
@@ -81,8 +80,7 @@ module.exports = class Commitment_bot extends Bot {
       "name": "example",
       "description": "an example of the commitment command syntax",
       "recurring": "true",
-      "time": "1 day",
-      "etc": ""
+      "time": "1 day"
     };
     this.commit_realExample = commit_realExample;
     let commit_realExample_pretty = JSON.stringify(commit_realExample, null, 2);
@@ -228,7 +226,7 @@ module.exports = class Commitment_bot extends Bot {
         let cmt = this.get_cmt(user, name);
 
         if (cmt) {
-          this.speaker.say(cmt.getInfo());
+          this.speaker.say(cmt.getInfo_pretty());
         } else {
           this.speaker.say("error: commitment name not found!");
         }

@@ -24,7 +24,7 @@ module.exports = class Bot {
     this.initCommands();
 
     // adds ability to run test command
-    this.addTestCommands();
+    // this.addTestCommands();
 
     this.client.on('ready', this.onBotLogin);
     this.client.on('message', this.respond);
