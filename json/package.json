@@ -1,8 +1,0 @@
-{
-"name": "commitment-bot",
-"version": "1.0.3",
-"description": "a discord bot for commitments; lets you record time commitments and holds you to them later",
-"main": "src/main.js",
-"author": "Jacob Stavrianos",
-"dependencies": {"discord.js", "winston", "node-schedule"}
-}
