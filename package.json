@@ -20,7 +20,7 @@
     "url": "git+https://github.com/vatsj/commitment-bot.git"
   },
   "keywords": [
-    "coo;"
+    "Discord", "node.js"
   ],
   "author": "Jacob Stavrianos",
   "license": "ISC",
