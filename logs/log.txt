@@ -1,3 +1,1 @@
-{"level":"info","message":"Connected"}
-{"level":"info","message":"Logged in as: "}
-{"level":"info","message":"commitment-bot (ID: 740396197528731729)"}
+testing github integration
